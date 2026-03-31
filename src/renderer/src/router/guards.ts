@@ -1,89 +1,29 @@
-import { getUserInfo } from '@/utils/permission'
-import { dataSyncService } from '@/services/dataSyncService'
-
 const logger = createRendererLogger('router')
 
-export const beforeEach = async (to, _from, next) => {
-  const token = localStorage.getItem('ctm-token')
-  const isSkippedLogin = localStorage.getItem('login-skipped') === 'true'
-  const isDev = import.meta.env.MODE === 'development'
-  if (to.path === '/login') {
-    if (isSkippedLogin) {
-      localStorage.removeItem('login-skipped')
-      localStorage.removeItem('ctm-token')
-      localStorage.removeItem('jms-token')
-      localStorage.removeItem('userInfo')
-    }
-    next()
-    return
-  }
+let dbInitialized = false
 
-  if (isSkippedLogin && token === 'guest_token') {
+export const beforeEach = async (_to, _from, next) => {
+  if (!dbInitialized) {
     try {
       const api = window.api as any
       const dbResult = await api.initUserDatabase({ uid: 999999999 })
       logger.info('Database initialization result', { success: dbResult.success })
 
       if (dbResult.success) {
-        if (to.path === '/') {
-          next()
-        } else {
-          next('/')
-        }
+        dbInitialized = true
+        next()
       } else {
-        logger.error('Database initialization failed, redirecting to login page')
-        localStorage.removeItem('login-skipped')
-        localStorage.removeItem('ctm-token')
-        localStorage.removeItem('jms-token')
-        localStorage.removeItem('userInfo')
-        next('/login')
+        logger.error('Database initialization failed')
+        next(false)
       }
     } catch (error) {
       logger.error('Database initialization failed', { error: error })
-      localStorage.removeItem('login-skipped')
-      localStorage.removeItem('ctm-token')
-      localStorage.removeItem('jms-token')
-      localStorage.removeItem('userInfo')
-      next('/login')
+      next(false)
     }
     return
   }
 
-  if (token && !isSkippedLogin) {
-    try {
-      const userInfo = getUserInfo()
-      if (userInfo && userInfo.uid) {
-        const api = window.api as any
-        const dbResult = await api.initUserDatabase({ uid: userInfo.uid })
-
-        if (dbResult.success) {
-          // After database initialization succeeds, asynchronously initialize data sync service (non-blocking UI display)
-          dataSyncService.initialize().catch((error) => {
-            logger.error('Data sync service initialization failed', { error: error })
-          })
-          next()
-        } else {
-          logger.error('Database initialization failed, redirecting to login page')
-          next('/login')
-        }
-      } else {
-        next('/login')
-      }
-    } catch (error) {
-      logger.error('Processing failed', { error: error })
-
-      const message = error instanceof Error ? error.message : String(error)
-
-      // In the development environment, bypass the relevant errors (usually caused by hot updates)
-      if (isDev && (message.includes('nextSibling') || message.includes('getUserInfo'))) {
-        next()
-        return
-      }
-      next('/login')
-    }
-  } else {
-    next('/login')
-  }
+  next()
 }
 
 export const afterEach = () => {}

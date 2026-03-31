@@ -36,14 +36,10 @@ export class ChatSyncService {
     try {
       logger.info('Initializing chat sync service...')
 
-      const isSkippedLogin = localStorage.getItem('login-skipped') === 'true'
-      const token = localStorage.getItem('ctm-token')
-
-      if (isSkippedLogin || token === 'guest_token') {
-        logger.info('Guest user detected, skipping chat sync initialization')
-        this.isInitialized = true
-        return
-      }
+      // Chat sync requires server authentication; skip initialization
+      logger.info('Chat sync disabled, no server authentication available')
+      this.isInitialized = true
+      return
 
       // Enable chat sync via IPC
       await this.enable()

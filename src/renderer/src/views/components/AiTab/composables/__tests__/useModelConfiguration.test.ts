@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { useModelConfiguration } from '../useModelConfiguration'
 import * as stateModule from '@renderer/agent/storage/state'
-import { getUser } from '@api/user/user'
 import { ref } from 'vue'
 
 // Create a shared mock ref that can be updated in tests
@@ -13,10 +12,6 @@ vi.mock('@renderer/agent/storage/state', () => ({
   updateGlobalState: vi.fn(),
   storeSecret: vi.fn(),
   getSecret: vi.fn()
-}))
-
-vi.mock('@api/user/user', () => ({
-  getUser: vi.fn()
 }))
 
 vi.mock('../useTabManagement', () => ({
@@ -199,37 +194,21 @@ describe('useModelConfiguration', () => {
       const { initModelOptions } = useModelConfiguration()
       await initModelOptions()
 
-      // Should return early and not call getUser since modelOptions already exists
+      // Should return early since modelOptions already exists
       expect(stateModule.getGlobalState).toHaveBeenCalledWith('modelOptions')
     })
 
-    it('should fetch and save model options when none exist', async () => {
-      const mockGetUser = vi.fn().mockResolvedValue({
-        data: {
-          models: ['claude-4-5-sonnet', 'gpt-5'],
-          llmGatewayAddr: 'https://api.example.com',
-          key: 'test-key'
-        }
-      })
-
+    it('should initialize with empty model options when none exist', async () => {
       vi.mocked(stateModule.getGlobalState).mockImplementation(async (key) => {
         if (key === 'modelOptions') return []
         return null
       })
 
-      // Mock getUser
-      const userModule = await import('@api/user/user')
-      vi.mocked(userModule.getUser).mockImplementation(mockGetUser)
-
       const { initModelOptions } = useModelConfiguration()
       await initModelOptions()
 
-      // Should fetch models from API
-      expect(mockGetUser).toHaveBeenCalled()
-      // Should save fetched models
-      expect(stateModule.updateGlobalState).toHaveBeenCalledWith('modelOptions', expect.any(Array))
-      expect(stateModule.updateGlobalState).toHaveBeenCalledWith('defaultBaseUrl', 'https://api.example.com')
-      expect(stateModule.storeSecret).toHaveBeenCalledWith('defaultApiKey', 'test-key')
+      // Should initialize with empty model options
+      expect(stateModule.updateGlobalState).toHaveBeenCalledWith('modelOptions', [])
     })
   })
 
@@ -314,212 +293,27 @@ describe('useModelConfiguration', () => {
   })
 
   describe('refreshModelOptions', () => {
-    it('merges server models into existing options and preserves custom + checked state', async () => {
-      localStorage.removeItem('login-skipped')
-
-      const existing = [
-        { id: 's1', name: 'gpt-5', checked: false, type: 'standard', apiProvider: 'default' },
-        { id: 'c1', name: 'custom-x', checked: true, type: 'custom', apiProvider: 'openai' },
-        { id: 's2', name: 'old-standard', checked: true, type: 'standard', apiProvider: 'default' }
-      ]
-
-      // Expected order: retained standard, new standard, then custom
-      const mergedOptions = [
-        { id: 's1', name: 'gpt-5', checked: false, type: 'standard', apiProvider: 'default' },
-        { id: 'claude-4', name: 'claude-4', checked: true, type: 'standard', apiProvider: 'default' },
-        { id: 'c1', name: 'custom-x', checked: true, type: 'custom', apiProvider: 'openai' }
-      ]
-
-      let callCount = 0
+    it('should re-initialize model options from saved state', async () => {
       vi.mocked(stateModule.getGlobalState).mockImplementation(async (key) => {
-        if (key === 'modelOptions') {
-          // First call returns existing, subsequent calls return merged
-          callCount++
-          return callCount === 1 ? existing : mergedOptions
-        }
-        if (key === 'apiProvider') return 'default'
-        if (key === 'defaultModelId') return ''
+        if (key === 'modelOptions') return mockModelOptions
+        if (key === 'apiProvider') return 'anthropic'
+        if (key === 'defaultModelId') return 'claude-4-5-sonnet'
         return null
       })
-
-      vi.mocked(getUser).mockResolvedValue({
-        data: {
-          models: ['gpt-5', 'claude-4'],
-          llmGatewayAddr: 'https://api.example.com',
-          key: 'server-key'
-        }
-      } as any)
 
       const { refreshModelOptions, AgentAiModelsOptions } = useModelConfiguration()
       await refreshModelOptions()
 
-      // Verify order: retained standard, new standard, then custom
-      expect(stateModule.updateGlobalState).toHaveBeenCalledWith('modelOptions', [
-        { id: 's1', name: 'gpt-5', checked: false, type: 'standard', apiProvider: 'default' },
-        { id: 'claude-4', name: 'claude-4', checked: true, type: 'standard', apiProvider: 'default' },
-        { id: 'c1', name: 'custom-x', checked: true, type: 'custom', apiProvider: 'openai' }
-      ])
-      expect(stateModule.updateGlobalState).toHaveBeenCalledWith('defaultBaseUrl', 'https://api.example.com')
-      expect(stateModule.storeSecret).toHaveBeenCalledWith('defaultApiKey', 'server-key')
-      // Verify UI options are updated (initModel was called)
-      expect(AgentAiModelsOptions.value.map((o) => o.label)).toEqual(['claude-4', 'custom-x'])
-    })
-
-    it('does not update modelOptions when request fails', async () => {
-      localStorage.removeItem('login-skipped')
-
-      vi.mocked(stateModule.getGlobalState).mockImplementation(async (key) => {
-        if (key === 'modelOptions') return []
-        return null
-      })
-
-      vi.mocked(getUser).mockRejectedValue(new Error('network'))
-
-      const { refreshModelOptions } = useModelConfiguration()
-      await refreshModelOptions()
-
-      expect(stateModule.updateGlobalState).not.toHaveBeenCalledWith('modelOptions', expect.anything())
-    })
-
-    it('does not update modelOptions when server returns empty list', async () => {
-      localStorage.removeItem('login-skipped')
-
-      const existing = [{ id: 's1', name: 'gpt-5', checked: true, type: 'standard', apiProvider: 'default' }]
-
-      vi.mocked(stateModule.getGlobalState).mockImplementation(async (key) => {
-        if (key === 'modelOptions') return existing
-        return null
-      })
-
-      vi.mocked(getUser).mockResolvedValue({
-        data: {
-          models: [],
-          subscriptionModels: [],
-          llmGatewayAddr: 'https://api.example.com',
-          key: 'server-key'
-        }
-      } as any)
-
-      const { refreshModelOptions } = useModelConfiguration()
-      await refreshModelOptions()
-
-      // Should not update modelOptions when server returns empty list
-      expect(stateModule.updateGlobalState).not.toHaveBeenCalledWith('modelOptions', expect.anything())
-      // But should still update base URL and API key
-      expect(stateModule.updateGlobalState).toHaveBeenCalledWith('defaultBaseUrl', 'https://api.example.com')
-      expect(stateModule.storeSecret).toHaveBeenCalledWith('defaultApiKey', 'server-key')
-    })
-
-    it('populates allLockedNames and lockedModels when server returns subscriptionModels', async () => {
-      localStorage.removeItem('login-skipped')
-
-      const existing = [
-        { id: 's1', name: 'gpt-5', checked: true, type: 'standard', apiProvider: 'default' },
-        { id: 's2', name: 'locked-one', checked: true, type: 'standard', apiProvider: 'default' }
-      ]
-
-      vi.mocked(stateModule.getGlobalState).mockImplementation(async (key) => {
-        if (key === 'modelOptions') return existing
-        if (key === 'apiProvider') return 'default'
-        if (key === 'defaultModelId') return 'gpt-5'
-        return null
-      })
-
-      vi.mocked(getUser).mockResolvedValue({
-        data: {
-          models: ['gpt-5'],
-          subscriptionModels: ['gpt-5', 'locked-one'],
-          budgetResetAt: '2025-04-01',
-          subscription: 'pro',
-          llmGatewayAddr: 'https://api.example.com',
-          key: 'server-key'
-        }
-      } as any)
-
-      const { refreshModelOptions, lockedModels, AgentAiModelsOptions } = useModelConfiguration()
-      await refreshModelOptions()
-
-      expect(lockedModels.value).toContain('locked-one')
-      expect(lockedModels.value).not.toContain('gpt-5')
-      expect(stateModule.updateGlobalState).toHaveBeenCalledWith(
-        'modelOptions',
-        expect.arrayContaining([
-          expect.objectContaining({ name: 'gpt-5', type: 'standard' }),
-          expect.objectContaining({ name: 'locked-one', type: 'standard' })
-        ])
-      )
-      expect(AgentAiModelsOptions.value.map((o) => o.value)).not.toContain('locked-one')
-      expect(AgentAiModelsOptions.value.map((o) => o.value)).toContain('gpt-5')
+      // refreshModelOptions calls initModel which loads from saved state
+      expect(AgentAiModelsOptions.value.length).toBeGreaterThan(0)
     })
   })
 
-  describe('locked models (subscription overage)', () => {
-    it('initModel excludes locked models from AgentAiModelsOptions and only shows checked locked in lockedModels', async () => {
-      vi.mocked(getUser).mockResolvedValue({
-        data: {
-          models: ['gpt-5'],
-          subscriptionModels: ['gpt-5', 'locked-a', 'locked-b']
-        }
-      } as any)
-
-      const modelOptionsWithLocked = [
-        { id: '1', name: 'gpt-5', checked: true, type: 'standard', apiProvider: 'default' },
-        { id: '2', name: 'locked-a', checked: true, type: 'standard', apiProvider: 'default' },
-        { id: '3', name: 'locked-b', checked: false, type: 'standard', apiProvider: 'default' }
-      ]
-
+  describe('hasAvailableModels', () => {
+    it('hasAvailableModels is false when no checked models exist', async () => {
+      const noAvailableModels = [{ id: '1', name: 'claude-4-5-sonnet', checked: false, type: 'chat', apiProvider: 'anthropic' }]
       vi.mocked(stateModule.getGlobalState).mockImplementation(async (key) => {
-        if (key === 'modelOptions') return modelOptionsWithLocked
-        if (key === 'apiProvider') return 'default'
-        if (key === 'defaultModelId') return 'gpt-5'
-        return null
-      })
-
-      const { initModel, refreshModelOptions, AgentAiModelsOptions, lockedModels } = useModelConfiguration()
-      // Populate allLockedNames via refreshModelOptions so initModel uses correct locked set (avoids shared global state from prior tests)
-      await refreshModelOptions()
-      await initModel()
-
-      expect(AgentAiModelsOptions.value.map((o) => o.value)).toEqual(['gpt-5'])
-      expect(AgentAiModelsOptions.value.map((o) => o.value)).not.toContain('locked-a')
-      expect(lockedModels.value).toContain('locked-a')
-      expect(lockedModels.value).not.toContain('locked-b')
-    })
-
-    it('showLockedModelUpgradeTag is true when subscription is free or lite', async () => {
-      vi.mocked(stateModule.getGlobalState).mockImplementation(async () => null)
-      vi.mocked(getUser).mockResolvedValue({
-        data: { models: [], subscriptionModels: [], subscription: 'free' }
-      } as any)
-
-      const { refreshModelOptions, showLockedModelUpgradeTag } = useModelConfiguration()
-      await refreshModelOptions()
-
-      expect(showLockedModelUpgradeTag.value).toBe(true)
-    })
-
-    it('showLockedModelUpgradeTag is false when subscription is pro', async () => {
-      vi.mocked(stateModule.getGlobalState).mockImplementation(async (key) => {
-        if (key === 'modelOptions') return []
-        return null
-      })
-      vi.mocked(getUser).mockResolvedValue({
-        data: { models: ['gpt-5'], subscriptionModels: ['gpt-5'], subscription: 'pro' }
-      } as any)
-
-      const { refreshModelOptions, showLockedModelUpgradeTag } = useModelConfiguration()
-      await refreshModelOptions()
-
-      expect(showLockedModelUpgradeTag.value).toBe(false)
-    })
-
-    it('hasAvailableModels is false when only locked models are checked', async () => {
-      vi.mocked(getUser).mockResolvedValue({
-        data: { models: [], subscriptionModels: ['locked-only'] }
-      } as any)
-      const modelOptionsOnlyLocked = [{ id: '1', name: 'locked-only', checked: true, type: 'standard', apiProvider: 'default' }]
-      vi.mocked(stateModule.getGlobalState).mockImplementation(async (key) => {
-        if (key === 'modelOptions') return modelOptionsOnlyLocked
+        if (key === 'modelOptions') return noAvailableModels
         return null
       })
 

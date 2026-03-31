@@ -85,7 +85,7 @@ vi.mock('@renderer/agent/storage/state', () => ({
   storeSecret: vi.fn().mockResolvedValue(undefined),
   getSecret: vi.fn().mockResolvedValue(undefined)
 }))
-vi.mock('@api/user/user')
+vi.mock('@api/user/user', () => ({}))
 
 // In-memory storage for testing (shared across all tests)
 const storage = new Map<string, string>()
@@ -225,13 +225,9 @@ describe('AiTab Component - Browser Mode Integration', () => {
     // Setup global dependencies
     setupWindowApi()
 
-    // Mock localStorage - Set to logged-in state (login-skipped should NOT be 'true')
-    // This ensures the input textarea is visible in the component
-    // Important: The component checks if login-skipped === 'true', so we should NOT set it at all
-    // or set it to 'false' to ensure isSkippedLogin.value === false
+    // Mock localStorage
     const mockLocalStorage = new Map<string, string>()
     mockLocalStorage.set('token', 'mock-test-token') // Mock auth token
-    // Do NOT set 'login-skipped' or set it to 'false'
 
     Storage.prototype.getItem = vi.fn((key) => {
       return mockLocalStorage.get(key) || null

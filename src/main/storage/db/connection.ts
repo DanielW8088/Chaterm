@@ -327,8 +327,7 @@ async function applyAllMigrations(db: Database.Database): Promise<void> {
 }
 
 export async function initDatabase(userId?: number): Promise<Database.Database> {
-  const isSkippedLogin = !userId && localStorage.getItem('login-skipped') === 'true'
-  const targetUserId = userId || (isSkippedLogin ? getGuestUserId() : currentUserId)
+  const targetUserId = userId || currentUserId || getGuestUserId()
 
   if (!targetUserId) {
     throw new Error('User ID is required for database initialization')

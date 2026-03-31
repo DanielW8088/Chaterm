@@ -378,18 +378,13 @@ const isTransparent = computed(() => !!configStore.getUserConfig.background.imag
 const headerRef = ref<InstanceType<typeof Header> | null>(null)
 const allTabs = ref<InstanceType<typeof TabsPanel> | null>(null)
 const assetsRef = ref<InstanceType<typeof Assets> | null>(null)
-const isSkippedLogin = computed(() => {
-  return localStorage.getItem('login-skipped') === 'true'
-})
 const watermarkContent = reactive({
   content: computed(() => {
     if (!showWatermark.value) {
       return ['']
     }
-    if (isSkippedLogin.value) {
-      return ['Guest User']
-    }
-    return [userInfoStore().userInfo.name, userInfoStore().userInfo.email]
+    const info = userInfoStore().userInfo
+    return [info.name || 'User', info.email || '']
   }),
   font: {
     fontSize: 12,

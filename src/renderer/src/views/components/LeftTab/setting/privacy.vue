@@ -129,7 +129,6 @@ import { userConfigStore, remoteApplyGuard, getStoredUserConfigSnapshot, resolve
 import { dataSyncService } from '@/services/dataSyncService'
 import { useI18n } from 'vue-i18n'
 import { getPrivacyPolicyUrl } from '@/utils/edition'
-import { getUserInfo } from '@/utils/permission'
 import eventBus from '@/utils/eventBus'
 import type { TelemetrySetting } from '@shared/TelemetrySetting'
 
@@ -144,17 +143,7 @@ const userConfig = ref({
   telemetry: 'enabled'
 })
 
-const isUserLoggedIn = computed(() => {
-  const token = localStorage.getItem('ctm-token')
-  const isSkippedLogin = localStorage.getItem('login-skipped') === 'true'
-  try {
-    const userInfo = getUserInfo()
-    return !!(token && token !== 'guest_token' && !isSkippedLogin && userInfo?.uid)
-  } catch (error) {
-    logger.error('Failed to read user info', { error: error })
-    return false
-  }
-})
+const isUserLoggedIn = computed(() => false)
 
 const secretPatterns = computed(() => [
   {

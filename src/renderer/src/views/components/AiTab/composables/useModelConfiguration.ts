@@ -1,11 +1,10 @@
 import { ref, watch, computed } from 'vue'
 import { createGlobalState } from '@vueuse/core'
-import { getGlobalState, updateGlobalState, storeSecret, getSecret } from '@renderer/agent/storage/state'
+import { getGlobalState, updateGlobalState, getSecret } from '@renderer/agent/storage/state'
 
 const logger = createRendererLogger('ai.modelConfig')
 import { GlobalStateKey } from '@renderer/agent/storage/state-keys'
 import { notification } from 'ant-design-vue'
-import { getUser } from '@api/user/user'
 import { focusChatInput } from './useTabManagement'
 import { useSessionState } from './useSessionState'
 
@@ -20,13 +19,6 @@ interface ModelOption {
   checked: boolean
   type: string
   apiProvider: string
-}
-
-interface DefaultModel {
-  id: string
-  name?: string
-  provider?: string
-  [key: string]: unknown
 }
 
 const isEmptyValue = (value: unknown): boolean => value === undefined || value === ''
@@ -88,18 +80,6 @@ export const useModelConfiguration = createGlobalState(() => {
         return a.name.localeCompare(b.name)
       })
 
-      // Bootstrap full locked list from server when empty (e.g. user opened settings before AI panel)
-      if (allLockedNames.value.length === 0) {
-        try {
-          const res = await getUser({})
-          const serverModels = (res?.data?.models || []).map((m: unknown) => String(m))
-          const subscriptionModelsList = (res?.data?.subscriptionModels || []).map((m: unknown) => String(m))
-          const availableSet = new Set(serverModels)
-          allLockedNames.value = subscriptionModelsList.filter((m: string) => !availableSet.has(m))
-        } catch {
-          // ignore
-        }
-      }
       // Always derive lockedModels from full list + current checked state (so newly checked locked models show as locked in dropdown)
       lockedModels.value = allLockedNames.value.filter((name) => {
         const opt = modelOptions.find((o) => o.name === name)
@@ -235,7 +215,6 @@ export const useModelConfiguration = createGlobalState(() => {
   const initModelOptions = async () => {
     try {
       modelsLoading.value = true
-      const isSkippedLogin = localStorage.getItem('login-skipped') === 'true'
       const savedModelOptions = ((await getGlobalState('modelOptions')) || []) as ModelOption[]
       logger.info('savedModelOptions', { data: savedModelOptions })
 
@@ -243,39 +222,8 @@ export const useModelConfiguration = createGlobalState(() => {
         return
       }
 
-      // Skip loading built-in models if user skipped login
-      if (isSkippedLogin) {
-        // Initialize with empty model options for guest users
-        await updateGlobalState('modelOptions', [])
-        return
-      }
-
-      let defaultModels: DefaultModel[] = []
-
-      await getUser({}).then((res) => {
-        logger.info('getUser response', { data: res })
-        defaultModels = res?.data?.models || []
-        updateGlobalState('defaultBaseUrl', res?.data?.llmGatewayAddr)
-        storeSecret('defaultApiKey', res?.data?.key)
-      })
-
-      const modelOptions: ModelOption[] = defaultModels.map((model) => ({
-        id: String(model) || '',
-        name: String(model) || '',
-        checked: true,
-        type: 'standard',
-        apiProvider: 'default'
-      }))
-
-      const serializableModelOptions = modelOptions.map((model) => ({
-        id: model.id,
-        name: model.name,
-        checked: Boolean(model.checked),
-        type: model.type || 'standard',
-        apiProvider: model.apiProvider || 'default'
-      }))
-
-      await updateGlobalState('modelOptions', serializableModelOptions)
+      // Initialize with empty model options; users configure models in settings
+      await updateGlobalState('modelOptions', [])
     } catch (error) {
       logger.error('Failed to get/save model options', { error: error })
       notification.error({
@@ -287,86 +235,7 @@ export const useModelConfiguration = createGlobalState(() => {
   }
 
   const refreshModelOptions = async (): Promise<void> => {
-    const isSkippedLogin = localStorage.getItem('login-skipped') === 'true'
-    if (isSkippedLogin) return
-
-    let serverModels: string[] = []
-    let subscriptionModelsList: string[] = []
-    try {
-      const res = await getUser({})
-      serverModels = (res?.data?.models || []).map((model) => String(model))
-      subscriptionModelsList = (res?.data?.subscriptionModels || []).map((m: unknown) => String(m))
-      budgetResetAt.value = res?.data?.budgetResetAt || ''
-      subscription.value = res?.data?.subscription || ''
-      await updateGlobalState('defaultBaseUrl', res?.data?.llmGatewayAddr)
-      await storeSecret('defaultApiKey', res?.data?.key)
-    } catch (error) {
-      logger.error('Failed to refresh model options', { error: error })
-      return
-    }
-
-    const availableSet = new Set(serverModels)
-    const lockedFromServer = subscriptionModelsList.filter((m) => !availableSet.has(m))
-    allLockedNames.value = lockedFromServer
-
-    // Skip update if server returns empty list to avoid accidental clearing
-    if (serverModels.length === 0 && subscriptionModelsList.length === 0) {
-      lockedModels.value = []
-      return
-    }
-
-    const savedModelOptions = ((await getGlobalState('modelOptions')) || []) as ModelOption[]
-    const allKnownSet = new Set([...serverModels, ...subscriptionModelsList])
-
-    const existingStandard = savedModelOptions.filter((opt) => opt.type === 'standard')
-    const existingCustom = savedModelOptions.filter((opt) => opt.type !== 'standard')
-
-    const retainedStandard = existingStandard
-      .filter((opt) => allKnownSet.has(opt.name))
-      .map((opt) => ({
-        id: opt.id || opt.name,
-        name: opt.name,
-        checked: Boolean(opt.checked),
-        type: 'standard',
-        apiProvider: opt.apiProvider || 'default'
-      }))
-
-    const retainedNames = new Set(retainedStandard.map((opt) => opt.name))
-
-    const newAvailable = serverModels
-      .filter((name) => !retainedNames.has(name))
-      .map((name) => ({
-        id: name,
-        name,
-        checked: true,
-        type: 'standard',
-        apiProvider: 'default'
-      }))
-
-    const allAddedNames = new Set([...retainedNames, ...newAvailable.map((o) => o.name)])
-    const newLocked = lockedFromServer
-      .filter((name) => !allAddedNames.has(name))
-      .map((name) => ({
-        id: name,
-        name,
-        checked: true,
-        type: 'standard',
-        apiProvider: 'default'
-      }))
-
-    const updatedOptions = [...retainedStandard, ...newAvailable, ...newLocked, ...existingCustom]
-    await updateGlobalState('modelOptions', updatedOptions)
-
-    // Compute locked models filtered by checked state
-    if (lockedFromServer.length > 0) {
-      lockedModels.value = lockedFromServer.filter((name) => {
-        const opt = updatedOptions.find((o) => o.name === name)
-        return !opt || opt.checked
-      })
-    } else {
-      lockedModels.value = []
-    }
-
+    // Re-initialize from locally saved model options
     await initModel()
   }
 

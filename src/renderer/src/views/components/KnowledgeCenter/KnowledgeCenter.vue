@@ -273,7 +273,6 @@ import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'v
 import { useI18n } from 'vue-i18n'
 import { message, Modal } from 'ant-design-vue'
 import eventBus from '@/utils/eventBus'
-import { getUser } from '@/api/user/user'
 import {
   CloudOutlined,
   CloudUploadOutlined,
@@ -350,16 +349,7 @@ async function loadCloudStorage(): Promise<void> {
 }
 
 async function loadUserSubscription(): Promise<void> {
-  if (localStorage.getItem('login-skipped') === 'true') {
-    subscription.value = undefined
-    return
-  }
-  try {
-    const res: any = await getUser({})
-    subscription.value = typeof res?.data?.subscription === 'string' ? res.data.subscription : undefined
-  } catch {
-    subscription.value = undefined
-  }
+  subscription.value = undefined
 }
 
 function importErrorMessage(err: unknown, forFolder: boolean): string {

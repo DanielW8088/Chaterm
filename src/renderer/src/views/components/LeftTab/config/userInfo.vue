@@ -463,16 +463,15 @@
 import { ref, onMounted, onBeforeUnmount, reactive, computed } from 'vue'
 import '@xterm/xterm/css/xterm.css'
 import i18n from '@/locales'
-import {
-  getUser,
-  updateUser,
-  changePassword,
-  sendEmailBindCode,
-  verifyAndBindEmail,
-  sendMobileBindCode,
-  verifyAndBindMobile,
-  updateAvatar
-} from '@api/user/user'
+// User API functions stubbed - server auth removed
+const getUser = (_params?: any) => Promise.resolve({ data: {} })
+const updateUser = (_data?: any) => Promise.resolve({ code: 200, data: {} })
+const changePassword = (_data?: any) => Promise.resolve({ code: 200 })
+const sendEmailBindCode = (_params?: any) => Promise.resolve({ code: 200 })
+const verifyAndBindEmail = (_params?: any) => Promise.resolve({ code: 200 })
+const sendMobileBindCode = (_params?: any) => Promise.resolve({ code: 200 })
+const verifyAndBindMobile = (_params?: any) => Promise.resolve({ code: 200 })
+const updateAvatar = (_params?: any) => Promise.resolve({ code: 200 })
 import { EditOutlined, CheckOutlined, CloseOutlined, FormOutlined, CameraOutlined } from '@ant-design/icons-vue'
 import { useDeviceStore } from '@/store/useDeviceStore'
 import { message } from 'ant-design-vue'

@@ -44,15 +44,10 @@ export class DataSyncService {
     try {
       logger.info('Initializing data sync service...')
 
-      // Check if it's a guest user
-      const isSkippedLogin = localStorage.getItem('login-skipped') === 'true'
-      const token = localStorage.getItem('ctm-token')
-
-      if (isSkippedLogin || token === 'guest_token') {
-        logger.info('Guest user detected, skipping data sync initialization')
-        this.isInitialized = true
-        return
-      }
+      // Data sync requires server authentication; skip initialization
+      logger.info('Data sync disabled, no server authentication available')
+      this.isInitialized = true
+      return
 
       const rawConfig = await getStoredUserConfigSnapshot()
       const isDataSyncEnabled = resolveDataSyncPreference(rawConfig, true) === 'enabled'

@@ -551,7 +551,6 @@ import { LockOutlined } from '@ant-design/icons-vue'
 import { updateGlobalState, getGlobalState, getSecret, storeSecret, getAllExtensionState } from '@renderer/agent/storage/state'
 import eventBus from '@/utils/eventBus'
 import i18n from '@/locales'
-import { getUser } from '@api/user/user'
 
 const logger = createRendererLogger('settings.model')
 
@@ -562,15 +561,6 @@ interface ModelOption {
   checked: boolean
   type: string
   apiProvider: string
-}
-
-// Define interface for default models from API
-interface DefaultModel {
-  id: string
-  name?: string
-  provider?: string
-
-  [key: string]: unknown
 }
 
 const { t } = i18n.global
@@ -1016,83 +1006,15 @@ const sortModelOptions = () => {
 
 const loadModelOptions = async () => {
   try {
-    const isSkippedLogin = localStorage.getItem('login-skipped') === 'true'
-
-    // Skip loading built-in models if user skipped login
-    if (isSkippedLogin) {
-      const savedModelOptions = (await getGlobalState('modelOptions')) || []
-      if (savedModelOptions && Array.isArray(savedModelOptions)) {
-        // Only load custom models for guest users
-        modelOptions.value = savedModelOptions
-          .filter((option) => option.type !== 'standard')
-          .map((option) => ({
-            id: option.id || '',
-            name: option.name || '',
-            checked: Boolean(option.checked),
-            type: option.type || 'custom',
-            apiProvider: option.apiProvider || 'default'
-          }))
-        sortModelOptions()
-      }
-      await saveModelOptions()
-      return
-    }
-
-    let defaultModels: DefaultModel[] = []
-    let subscriptionModelsList: string[] = []
-    await getUser({}).then((res) => {
-      defaultModels = res?.data?.models || []
-      subscriptionModelsList = (res?.data?.subscriptionModels || []).map((m: unknown) => String(m))
-      updateGlobalState('defaultBaseUrl', res?.data?.llmGatewayAddr)
-      storeSecret('defaultApiKey', res?.data?.key)
-    })
-
-    const availableSet = new Set(defaultModels.map((m) => String(m)))
-    const allKnownSet = new Set([...availableSet, ...subscriptionModelsList])
-    lockedModelNames.value = new Set(subscriptionModelsList.filter((m) => !availableSet.has(m)))
-
     const savedModelOptions = (await getGlobalState('modelOptions')) || []
     if (savedModelOptions && Array.isArray(savedModelOptions)) {
-      const filteredOptions = savedModelOptions.filter((option) => {
-        if (option.type !== 'standard') return true
-        return allKnownSet.has(option.name)
-      })
-
-      defaultModels.forEach((defaultModel) => {
-        const name = String(defaultModel)
-        const exists = filteredOptions.some((option) => option.name === name)
-        if (!exists) {
-          filteredOptions.push({
-            id: name,
-            name: name,
-            checked: true,
-            type: 'standard',
-            apiProvider: 'default'
-          })
-        }
-      })
-
-      lockedModelNames.value.forEach((name) => {
-        const exists = filteredOptions.some((option) => option.name === name)
-        if (!exists) {
-          filteredOptions.push({
-            id: name,
-            name: name,
-            checked: true,
-            type: 'standard',
-            apiProvider: 'default'
-          })
-        }
-      })
-
-      modelOptions.value = filteredOptions.map((option) => ({
+      modelOptions.value = savedModelOptions.map((option) => ({
         id: option.id || '',
         name: option.name || '',
         checked: Boolean(option.checked),
-        type: option.type || 'standard',
+        type: option.type || 'custom',
         apiProvider: option.apiProvider || 'default'
       }))
-
       sortModelOptions()
     }
     await saveModelOptions()

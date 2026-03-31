@@ -48,8 +48,7 @@ import { getTaskMetadata, saveTaskTitle, saveTaskFavorite, getTaskList } from '.
 import { createMainWindow, type WindowCreationResult } from './windowManager'
 import { registerUpdater } from './updater'
 import { setupPluginIpc } from './plugin/pluginIpc'
-import { telemetryService, checkIsFirstLaunch, getMacAddress } from './agent/services/telemetry/TelemetryService'
-import { envelopeEncryptionService } from './storage/data_sync/envelope_encryption/service'
+import { telemetryService, checkIsFirstLaunch } from './agent/services/telemetry/TelemetryService'
 import { versionPromptService } from './version/versionPromptService'
 
 import * as fsSync from 'fs'
@@ -67,7 +66,7 @@ import {
 import { getPluginDetailsByName, getLocalizedStrings, getUserLanguage } from './plugin/pluginDetails'
 import { capabilityRegistry } from './ssh/capabilityRegistry'
 import { getActualTheme, loadUserTheme } from './themeManager'
-import { getLoginBaseUrl, getEdition, getProtocolPrefix, getProtocolName } from './config/edition'
+import { getEdition, getProtocolPrefix, getProtocolName } from './config/edition'
 import { TelemetrySetting } from '@shared/TelemetrySetting'
 import { registerKnowledgeBaseHandlers, initKbSearchManager, closeKbSearchManager } from './services/knowledgebase'
 import { registerStageChatAttachmentHandlers } from './services/agent/stageChatAttachment'
@@ -993,17 +992,9 @@ function setupIPC(): void {
   registerKnowledgeBaseHandlers()
   registerStageChatAttachmentHandlers()
 
-  ipcMain.handle('init-user-database', async (event, { uid }) => {
+  ipcMain.handle('init-user-database', async (_event, { uid }) => {
     try {
-      const isSkippedLogin = await event.sender.executeJavaScript("localStorage.getItem('login-skipped') === 'true'")
-      const targetUserId = uid || (isSkippedLogin ? getGuestUserId() : null)
-      if (!targetUserId) {
-        throw new Error('User ID is required')
-      }
-
-      // Check if user switch occurred (user ID changed)
-      const previousUserId = getCurrentUserId()
-      const isUserSwitch = previousUserId && previousUserId !== targetUserId
+      const targetUserId = uid || getGuestUserId()
 
       setCurrentUserId(targetUserId)
       chatermDbService = await ChatermDatabaseService.getInstance(targetUserId)
@@ -1011,34 +1002,6 @@ function setupIPC(): void {
 
       // Load and apply user theme configuration
       const dbTheme = await loadUserTheme(chatermDbService)
-
-      // Sync authentication info, ensure completion before data sync starts
-      try {
-        // Get user authentication info and set it to encryption service
-        const ctmToken = await event.sender.executeJavaScript("localStorage.getItem('ctm-token')")
-        if (ctmToken && ctmToken !== 'guest_token') {
-          logger.info(`Setting authentication info for user ${targetUserId}...`)
-          envelopeEncryptionService.setAuthInfo(ctmToken, targetUserId.toString())
-          logger.info(`Authentication info set completed for user ${targetUserId}`)
-        } else {
-          logger.warn(`No valid authentication token found for user ${targetUserId}`)
-        }
-
-        // User switch completed, data sync will be re-initialized by renderer process
-        if (isUserSwitch) {
-          logger.info(`User switch detected: ${previousUserId} -> ${targetUserId}, cleaning up chat sync scheduler`)
-          if (chatSyncScheduler) {
-            chatSyncScheduler.destroy()
-            chatSyncScheduler = null
-            logger.info('Chat sync scheduler destroyed during user switch')
-          }
-        }
-      } catch (error) {
-        logger.warn('Exception setting authentication info', { value: error })
-        if (isUserSwitch) {
-          logger.info(`Authentication info setting failed, user switch: ${previousUserId} -> ${targetUserId}`)
-        }
-      }
 
       // Reload skill states after user login (skills are loaded but states need user DB)
       if (controller && controller.skillsManager) {
@@ -2988,71 +2951,9 @@ if (process.platform === 'linux') {
   })
 }
 
-// Process protocol redirection
-const handleProtocolRedirect = async (url: string) => {
-  // Get main window
-  let targetWindow = BrowserWindow.getAllWindows()[0]
-
-  // On Linux platform, try to find the original window that initiated login
-  if (process.platform === 'linux') {
-    try {
-      // Try to get original window ID from cookie
-      const authStateCookie = await session.defaultSession.cookies.get({
-        url: COOKIE_URL,
-        name: 'chaterm_auth_state'
-      })
-
-      if (authStateCookie && authStateCookie.length > 0) {
-        const authState = JSON.parse(authStateCookie[0].value)
-        const originalWindowId = authState.windowId
-
-        // Try to find original window
-        const originalWindow = BrowserWindow.fromId(originalWindowId)
-        if (originalWindow && !originalWindow.isDestroyed()) {
-          targetWindow = originalWindow
-          logger.info('Found original window, ID', { value: originalWindowId })
-
-          // Clear authentication state cookie
-          await session.defaultSession.cookies.remove(COOKIE_URL, 'chaterm_auth_state')
-        }
-      }
-    } catch (error) {
-      logger.error('Failed to get original window', { error: error })
-    }
-  }
-
-  if (!targetWindow) {
-    logger.error('No available window found to handle protocol redirection')
-    return
-  }
-
-  // Parse token and user info from URL
-  const urlObj = new URL(url)
-  const userInfo = urlObj.searchParams.get('userInfo')
-  const method = urlObj.searchParams.get('method')
-
-  if (userInfo) {
-    try {
-      // Send data to renderer process
-      targetWindow.webContents.send('external-login-success', {
-        userInfo: JSON.parse(userInfo),
-        method: method
-      })
-
-      // Ensure window is visible and focused
-      if (targetWindow.isMinimized()) {
-        targetWindow.restore()
-      }
-      targetWindow.focus()
-
-      // After external login succeeds, check if data sync service needs to be restarted
-      // Note: We cannot directly get user ID here because renderer process hasn't finished login logic
-      // So we handle data sync restart through init-user-database after renderer process finishes login
-      logger.info('External login succeeded, waiting for renderer process to handle user initialization...')
-    } catch (error) {
-      logger.error('Failed to process external login data', { error: error })
-    }
-  }
+// Protocol redirection handler - no-op since authentication is removed
+const handleProtocolRedirect = async (_url: string) => {
+  logger.info('Protocol redirect ignored, authentication has been removed')
 }
 
 const dispatchXshellWakeupToRenderer = (payload: XshellWakeupPayload) => {
@@ -3172,59 +3073,9 @@ ipcMain.handle('xshell-wakeup:consume-pending', async () => {
   return queue
 })
 
-// Add IPC handler after creating Window function
+// External login handler - no-op since authentication is removed
 ipcMain.handle('open-external-login', async () => {
-  try {
-    // Generate a random state value for security verification
-    const state = Math.random().toString(36).substring(2)
-    // Store status values for subsequent verification
-    global.authState = state
-
-    // Get MAC address
-    const macAddress = getMacAddress()
-
-    // Get local plugin versions
-    let localPluginsEncoded = ''
-    try {
-      const localPlugins = await getAllPluginVersions()
-      const localPluginsJson = JSON.stringify(localPlugins)
-      localPluginsEncoded = encodeURIComponent(localPluginsJson)
-    } catch (error) {
-      logger.error('Failed to get plugin versions', { error: error })
-      localPluginsEncoded = encodeURIComponent(JSON.stringify({}))
-    }
-
-    // Build login URL based on edition configuration (no IP detection)
-    const loginBaseUrl = getLoginBaseUrl()
-    const protocolPrefix = getProtocolPrefix()
-    const protocolName = getProtocolName()
-    const externalLoginUrl = `${loginBaseUrl}/login?client_id=${protocolName}&state=${state}&redirect_uri=${protocolPrefix}auth/callback&mac_address=${encodeURIComponent(macAddress)}&local_plugins=${localPluginsEncoded}`
-
-    logger.info('[Login] Opening external login', { event: 'login.external.open', edition: getEdition(), loginBaseUrl })
-
-    // On Linux platform, save state to local storage for new instances to access
-    if (process.platform === 'linux') {
-      try {
-        // Save current window ID for callback to find the correct window
-        const windowId = mainWindow.id
-        await session.defaultSession.cookies.set({
-          url: COOKIE_URL,
-          name: 'chaterm_auth_state',
-          value: JSON.stringify({ state, windowId }),
-          expirationDate: Date.now() / 1000 + 600 // 10 minutes expiry
-        })
-      } catch (error) {
-        logger.error('Failed to save auth state', { error: error })
-      }
-    }
-
-    // Open external login page
-    await shell.openExternal(externalLoginUrl)
-    return { success: true }
-  } catch (error) {
-    logger.error('Failed to open external login page', { error: error })
-    return { success: false, error: error instanceof Error ? error.message : String(error) }
-  }
+  return { success: false, error: 'Authentication has been removed' }
 })
 
 // Global type declarations

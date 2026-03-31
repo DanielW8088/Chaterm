@@ -24,7 +24,6 @@ import ModelComponent from '../model.vue'
 import { notification } from 'ant-design-vue'
 import eventBus from '@/utils/eventBus'
 import { updateGlobalState, getGlobalState, getSecret, storeSecret, getAllExtensionState } from '@renderer/agent/storage/state'
-import { getUser } from '@api/user/user'
 
 // Mock ant-design-vue components
 vi.mock('ant-design-vue', () => ({
@@ -120,11 +119,6 @@ vi.mock('@/utils/eventBus', () => ({
   }
 }))
 
-// Mock getUser API
-vi.mock('@api/user/user', () => ({
-  getUser: vi.fn()
-}))
-
 // Mock window.api
 const mockWindowApi = {
   validateApiKey: vi.fn()
@@ -190,7 +184,6 @@ describe('Model Component', () => {
 
     // Setup localStorage
     localStorage.clear()
-    localStorage.setItem('login-skipped', 'false')
 
     // Reset all mocks
     vi.clearAllMocks()
@@ -214,13 +207,6 @@ describe('Model Component', () => {
     ;(storeSecret as ReturnType<typeof vi.fn>).mockResolvedValue(undefined)
     ;(updateGlobalState as ReturnType<typeof vi.fn>).mockResolvedValue(undefined)
     ;(getAllExtensionState as ReturnType<typeof vi.fn>).mockResolvedValue({ apiConfiguration: {} })
-    ;(getUser as ReturnType<typeof vi.fn>).mockResolvedValue({
-      data: {
-        models: ['gpt-4', 'gpt-3.5-turbo'],
-        llmGatewayAddr: 'https://api.example.com',
-        key: 'default-api-key'
-      }
-    })
     mockWindowApi.validateApiKey.mockResolvedValue({ isValid: true })
 
     // Clear console output for cleaner test results
@@ -279,7 +265,6 @@ describe('Model Component', () => {
       // Wait for async operations in onMounted
       await new Promise((resolve) => setTimeout(resolve, 50))
 
-      expect(getUser).toHaveBeenCalled()
       expect(getGlobalState).toHaveBeenCalledWith('modelOptions')
     })
 
@@ -317,14 +302,6 @@ describe('Model Component', () => {
         if (key === 'ollamaModelId') return ''
         return null
       })
-      ;(getUser as ReturnType<typeof vi.fn>).mockResolvedValue({
-        data: {
-          models: ['gpt-4'],
-          llmGatewayAddr: 'https://api.example.com',
-          key: 'default-api-key'
-        }
-      })
-
       wrapper = createWrapper()
       await nextTick()
       // Wait for async operations in onMounted
@@ -361,14 +338,6 @@ describe('Model Component', () => {
         if (key === 'ollamaModelId') return ''
         return null
       })
-      ;(getUser as ReturnType<typeof vi.fn>).mockResolvedValue({
-        data: {
-          models: ['gpt-4-Thinking'],
-          llmGatewayAddr: 'https://api.example.com',
-          key: 'default-api-key'
-        }
-      })
-
       wrapper = createWrapper()
       await nextTick()
       // Wait for async operations in onMounted
@@ -393,14 +362,6 @@ describe('Model Component', () => {
         if (key === 'ollamaModelId') return ''
         return null
       })
-      ;(getUser as ReturnType<typeof vi.fn>).mockResolvedValue({
-        data: {
-          models: [],
-          llmGatewayAddr: 'https://api.example.com',
-          key: 'default-api-key'
-        }
-      })
-
       wrapper = createWrapper()
       await nextTick()
       // Wait for async operations in onMounted
@@ -443,14 +404,6 @@ describe('Model Component', () => {
         if (key === 'ollamaModelId') return ''
         return null
       })
-      ;(getUser as ReturnType<typeof vi.fn>).mockResolvedValue({
-        data: {
-          models: ['gpt-4'],
-          llmGatewayAddr: 'https://api.example.com',
-          key: 'default-api-key'
-        }
-      })
-
       wrapper = createWrapper()
       await nextTick()
       // Wait for async operations in onMounted
@@ -501,14 +454,6 @@ describe('Model Component', () => {
         if (key === 'ollamaModelId') return ''
         return null
       })
-      ;(getUser as ReturnType<typeof vi.fn>).mockResolvedValue({
-        data: {
-          models: [],
-          llmGatewayAddr: 'https://api.example.com',
-          key: 'default-api-key'
-        }
-      })
-
       wrapper = createWrapper()
       await nextTick()
       // Wait for async operations in onMounted
@@ -958,14 +903,6 @@ describe('Model Component', () => {
         if (key === 'ollamaModelId') return ''
         return null
       })
-      ;(getUser as ReturnType<typeof vi.fn>).mockResolvedValue({
-        data: {
-          models: [],
-          llmGatewayAddr: 'https://api.example.com',
-          key: 'default-api-key'
-        }
-      })
-
       wrapper = createWrapper()
       await nextTick()
       await new Promise((resolve) => setTimeout(resolve, 50))
@@ -1011,14 +948,6 @@ describe('Model Component', () => {
         if (key === 'ollamaModelId') return ''
         return null
       })
-      ;(getUser as ReturnType<typeof vi.fn>).mockResolvedValue({
-        data: {
-          models: ['gpt-4'],
-          llmGatewayAddr: 'https://api.example.com',
-          key: 'default-api-key'
-        }
-      })
-
       wrapper = createWrapper()
       await nextTick()
       await new Promise((resolve) => setTimeout(resolve, 50))
@@ -1058,14 +987,6 @@ describe('Model Component', () => {
         if (key === 'ollamaModelId') return ''
         return null
       })
-      ;(getUser as ReturnType<typeof vi.fn>).mockResolvedValue({
-        data: {
-          models: ['gpt-4', 'gpt-4-Thinking'],
-          llmGatewayAddr: 'https://api.example.com',
-          key: 'default-api-key'
-        }
-      })
-
       wrapper = createWrapper()
       await nextTick()
       await new Promise((resolve) => setTimeout(resolve, 50))
@@ -1101,14 +1022,6 @@ describe('Model Component', () => {
         if (key === 'ollamaModelId') return ''
         return null
       })
-      ;(getUser as ReturnType<typeof vi.fn>).mockResolvedValue({
-        data: {
-          models: ['gpt-4'],
-          llmGatewayAddr: 'https://api.example.com',
-          key: 'default-api-key'
-        }
-      })
-
       wrapper = createWrapper()
       await nextTick()
       await new Promise((resolve) => setTimeout(resolve, 50))
@@ -1124,40 +1037,6 @@ describe('Model Component', () => {
           expect(standardIndex).toBeLessThan(customIndex)
         }
       }
-    })
-  })
-
-  describe('Guest User Handling', () => {
-    beforeEach(() => {
-      localStorage.setItem('login-skipped', 'true')
-    })
-
-    it('should only load custom models for guest users', async () => {
-      ;(getGlobalState as ReturnType<typeof vi.fn>).mockImplementation(async (key: string) => {
-        if (key === 'modelOptions') {
-          return [
-            { id: 'gpt-4', name: 'gpt-4', checked: true, type: 'standard', apiProvider: 'default' },
-            { id: 'custom-1', name: 'custom-model', checked: true, type: 'custom', apiProvider: 'openai' }
-          ]
-        }
-        return null
-      })
-
-      wrapper = createWrapper()
-      await nextTick()
-      await nextTick()
-
-      const vm = wrapper.vm as any
-      const standardModels = vm.modelOptions.filter((m: any) => m.type === 'standard')
-      expect(standardModels.length).toBe(0)
-    })
-
-    it('should not call getUser for guest users', async () => {
-      wrapper = createWrapper()
-      await nextTick()
-      await nextTick()
-
-      expect(getUser).not.toHaveBeenCalled()
     })
   })
 
@@ -1177,14 +1056,6 @@ describe('Model Component', () => {
         if (key === 'ollamaModelId') return ''
         return null
       })
-      ;(getUser as ReturnType<typeof vi.fn>).mockResolvedValue({
-        data: {
-          models: ['gpt-4', 'gpt-3.5-turbo'],
-          llmGatewayAddr: 'https://api.example.com',
-          key: 'default-api-key'
-        }
-      })
-
       wrapper = createWrapper()
       await nextTick()
       await new Promise((resolve) => setTimeout(resolve, 50))
@@ -1203,14 +1074,6 @@ describe('Model Component', () => {
         }
         return null
       })
-      ;(getUser as ReturnType<typeof vi.fn>).mockResolvedValue({
-        data: {
-          models: ['gpt-4'],
-          llmGatewayAddr: 'https://api.example.com',
-          key: 'default-api-key'
-        }
-      })
-
       wrapper = createWrapper()
       await nextTick()
       await nextTick()
@@ -1235,14 +1098,6 @@ describe('Model Component', () => {
         if (key === 'ollamaModelId') return ''
         return null
       })
-      ;(getUser as ReturnType<typeof vi.fn>).mockResolvedValue({
-        data: {
-          models: ['gpt-4', 'gpt-3.5-turbo', 'claude-3'],
-          llmGatewayAddr: 'https://api.example.com',
-          key: 'default-api-key'
-        }
-      })
-
       wrapper = createWrapper()
       await nextTick()
       await new Promise((resolve) => setTimeout(resolve, 50))
@@ -1255,30 +1110,6 @@ describe('Model Component', () => {
   })
 
   describe('Error Handling', () => {
-    it('should handle getUser API errors', async () => {
-      const error = new Error('API error')
-      ;(getUser as ReturnType<typeof vi.fn>).mockRejectedValue(error)
-      ;(getGlobalState as ReturnType<typeof vi.fn>).mockImplementation(async (key: string) => {
-        if (key === 'modelOptions') return []
-        if (key === 'awsRegion') return 'us-east-1'
-        if (key === 'awsUseCrossRegionInference') return false
-        if (key === 'awsBedrockEndpoint') return ''
-        if (key === 'awsEndpointSelected') return false
-        if (key === 'liteLlmBaseUrl') return ''
-        if (key === 'openAiBaseUrl') return 'https://api.openai.com/v1'
-        if (key === 'ollamaBaseUrl') return 'http://localhost:11434'
-        if (key === 'ollamaModelId') return ''
-        return null
-      })
-
-      wrapper = createWrapper()
-      await nextTick()
-      await new Promise((resolve) => setTimeout(resolve, 50))
-
-      // Error is caught and logged in component
-      expect(getUser).toHaveBeenCalled()
-    })
-
     it('should handle saveModelOptions errors', async () => {
       ;(getGlobalState as ReturnType<typeof vi.fn>).mockImplementation(async (key: string) => {
         if (key === 'modelOptions') {
@@ -1294,14 +1125,6 @@ describe('Model Component', () => {
         if (key === 'ollamaModelId') return ''
         return null
       })
-      ;(getUser as ReturnType<typeof vi.fn>).mockResolvedValue({
-        data: {
-          models: ['gpt-4'],
-          llmGatewayAddr: 'https://api.example.com',
-          key: 'default-api-key'
-        }
-      })
-
       wrapper = createWrapper()
       await nextTick()
       await new Promise((resolve) => setTimeout(resolve, 50))

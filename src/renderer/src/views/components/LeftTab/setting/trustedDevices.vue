@@ -163,16 +163,11 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
-import { message } from 'ant-design-vue'
 import { useI18n } from 'vue-i18n'
-import { getUserInfo } from '@/utils/permission'
 import { useDeviceStore } from '@/store/useDeviceStore'
-import { getTrustedDevices, revokeTrustedDevice } from '@api/user/user'
-
-const logger = createRendererLogger('settings.trustedDevices')
 
 const props = defineProps<{ isActive?: boolean }>()
-const { t } = useI18n()
+useI18n()
 const deviceStore = useDeviceStore()
 
 // Refetch list whenever user switches back to this tab (when pane stays mounted)
@@ -183,17 +178,7 @@ watch(
   }
 )
 
-const isUserLoggedIn = computed(() => {
-  const token = localStorage.getItem('ctm-token')
-  const isSkippedLogin = localStorage.getItem('login-skipped') === 'true'
-  try {
-    const userInfo = getUserInfo()
-    return !!(token && token !== 'guest_token' && !isSkippedLogin && userInfo?.uid)
-  } catch (error) {
-    logger.error('Failed to read user info', { error: error })
-    return false
-  }
-})
+const isUserLoggedIn = computed(() => false)
 
 interface TrustedDeviceItem {
   id: number
@@ -251,26 +236,6 @@ function shortenUserAgent(ua: string): string {
 
 async function loadDevices() {
   if (!isUserLoggedIn.value) return
-  loading.value = true
-  try {
-    const res = (await getTrustedDevices()) as any
-    const data = res?.data ?? res
-    devices.value = (data?.devices ?? []).map((d: any) => ({
-      id: d.id,
-      deviceName: d.deviceName ?? '',
-      macAddress: d.macAddress ?? '',
-      lastLoginAt: d.lastLoginAt ?? '',
-      location: d.location ?? '',
-      lastLoginUserAgent: d.lastLoginUserAgent ?? '',
-      lastLoginIp: d.lastLoginIp ?? ''
-    }))
-    maxAllowed.value = data?.maxAllowed ?? 3
-    currentCount.value = data?.currentCount ?? devices.value.length
-  } catch (e: any) {
-    message.error(e?.response?.data?.message ?? e?.message ?? t('user.trustedDevicesLoadFailed'))
-  } finally {
-    loading.value = false
-  }
 }
 
 function onRevoke(item: TrustedDeviceItem) {
@@ -280,20 +245,8 @@ function onRevoke(item: TrustedDeviceItem) {
 }
 
 async function confirmRevoke() {
-  const item = revokeTarget.value
-  if (!item) {
-    revokeModalVisible.value = false
-    return
-  }
-  try {
-    await revokeTrustedDevice(item.id)
-    message.success(t('common.saved') ?? 'Saved')
-    revokeModalVisible.value = false
-    revokeTarget.value = null
-    await loadDevices()
-  } catch (e: any) {
-    message.error(e?.response?.data?.message ?? e?.message ?? t('user.trustedDevicesRevokeFailed'))
-  }
+  revokeModalVisible.value = false
+  revokeTarget.value = null
 }
 
 // Always load when this pane mounts (first open or when tab content is created)

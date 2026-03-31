@@ -57,9 +57,7 @@ vi.mock('@renderer/agent/storage/state', () => ({
   getSecret: vi.fn()
 }))
 
-vi.mock('@api/user/user', () => ({
-  getUser: vi.fn()
-}))
+vi.mock('@api/user/user', () => ({}))
 
 describe('AiTab Component - Composable Integration Tests', () => {
   beforeEach(() => {
@@ -77,8 +75,7 @@ describe('AiTab Component - Composable Integration Tests', () => {
     mockWindowApi.getAllMcpToolStates.mockResolvedValue({})
 
     // Mock localStorage
-    Storage.prototype.getItem = vi.fn((key) => {
-      if (key === 'login-skipped') return 'false'
+    Storage.prototype.getItem = vi.fn(() => {
       return null
     })
     Storage.prototype.setItem = vi.fn()

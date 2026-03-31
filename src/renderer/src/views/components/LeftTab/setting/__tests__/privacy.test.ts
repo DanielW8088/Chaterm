@@ -206,10 +206,9 @@ describe('Privacy Component', () => {
   }
 
   // Helper function to setup localStorage mock
-  const setupLocalStorage = (token: string | null = 'test-token', skipLogin = false) => {
+  const setupLocalStorage = (token: string | null = 'test-token') => {
     Storage.prototype.getItem = vi.fn((key: string) => {
       if (key === 'ctm-token') return token
-      if (key === 'login-skipped') return skipLogin ? 'true' : null
       return null
     })
   }
@@ -224,7 +223,7 @@ describe('Privacy Component', () => {
     ;(global.window as unknown as { api: typeof mockWindowApi }).api = mockWindowApi
 
     // Setup localStorage mock (default: logged in)
-    setupLocalStorage('test-token', false)
+    setupLocalStorage('test-token')
 
     // Reset all mocks
     vi.clearAllMocks()
@@ -797,35 +796,8 @@ describe('Privacy Component', () => {
   })
 
   describe('User Login State', () => {
-    it('should show data sync options when user is logged in', async () => {
-      setupLocalStorage('test-token', false)
-      wrapper = createWrapper()
-      await waitForUpdates()
-
-      const vm = wrapper.vm as any
-      expect(vm.isUserLoggedIn).toBe(true)
-    })
-
-    it('should hide data sync options when user is not logged in', async () => {
-      setupLocalStorage(null, false)
-      wrapper = createWrapper()
-      await waitForUpdates()
-
-      const vm = wrapper.vm as any
-      expect(vm.isUserLoggedIn).toBe(false)
-    })
-
-    it('should hide data sync options when login is skipped', async () => {
-      setupLocalStorage('test-token', true)
-      wrapper = createWrapper()
-      await waitForUpdates()
-
-      const vm = wrapper.vm as any
-      expect(vm.isUserLoggedIn).toBe(false)
-    })
-
-    it('should hide data sync options when token is guest_token', async () => {
-      setupLocalStorage('guest_token', false)
+    it('should hide data sync options when auth is not available', async () => {
+      setupLocalStorage(null)
       wrapper = createWrapper()
       await waitForUpdates()
 

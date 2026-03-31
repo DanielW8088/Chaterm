@@ -74,17 +74,9 @@
             <div class="ai-login-prompt">
               <p>{{ $t('user.noAvailableModelMessage') }}</p>
               <p class="ai-prompt-description">
-                {{ isSkippedLogin ? $t('user.noAvailableModelDescription') : $t('user.noAvailableModelDescriptionLoggedIn') }}
+                {{ $t('user.noAvailableModelDescription') }}
               </p>
               <div class="ai-prompt-buttons">
-                <a-button
-                  v-if="isSkippedLogin"
-                  type="primary"
-                  class="login-button"
-                  @click="goToLogin"
-                >
-                  {{ $t('common.login') }}
-                </a-button>
                 <a-button
                   type="primary"
                   class="configure-model-button"
@@ -747,7 +739,6 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
-import { useRouter } from 'vue-router'
 import { useAutoScroll } from './composables/useAutoScroll'
 import { useChatHistory } from './composables/useChatHistory'
 import { useChatMessages } from './composables/useChatMessages'
@@ -821,10 +812,6 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits(['state-changed'])
-
-const router = useRouter()
-
-const isSkippedLogin = ref(localStorage.getItem('login-skipped') === 'true')
 
 const {
   currentChatId,
@@ -1003,10 +990,6 @@ useEventBusListeners({
   isAgentMode: props.isAgentMode
 })
 
-const goToLogin = () => {
-  router.push('/login')
-}
-
 const goToModelSettings = () => {
   eventBus.emit('openUserTab', 'userConfig')
   setTimeout(() => {
@@ -1033,13 +1016,6 @@ watch(editingTabId, (newId) => {
     })
   }
 })
-
-watch(
-  () => localStorage.getItem('login-skipped'),
-  (newValue) => {
-    isSkippedLogin.value = newValue === 'true'
-  }
-)
 
 useWatchers({
   emitStateChange,

@@ -95,7 +95,6 @@ describe('DataSyncService', () => {
     }
 
     vi.spyOn(Storage.prototype, 'getItem').mockImplementation((key: string) => {
-      if (key === 'login-skipped') return null
       if (key === 'ctm-token') return 'test-token'
       return null
     })

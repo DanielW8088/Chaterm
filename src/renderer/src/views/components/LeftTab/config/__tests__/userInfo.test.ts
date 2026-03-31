@@ -3,16 +3,6 @@ import { mount, VueWrapper } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import { createPinia, setActivePinia } from 'pinia'
 import UserInfoComponent from '../userInfo.vue'
-import {
-  getUser,
-  updateUser,
-  changePassword,
-  sendEmailBindCode,
-  verifyAndBindEmail,
-  sendMobileBindCode,
-  verifyAndBindMobile,
-  updateAvatar
-} from '@api/user/user'
 import { useDeviceStore } from '@/store/useDeviceStore'
 import { message } from 'ant-design-vue'
 import zxcvbn from 'zxcvbn'
@@ -106,18 +96,6 @@ vi.mock('@/locales', () => {
   }
 })
 
-// Mock API functions
-vi.mock('@api/user/user', () => ({
-  getUser: vi.fn(),
-  updateUser: vi.fn(),
-  changePassword: vi.fn(),
-  sendEmailBindCode: vi.fn(),
-  verifyAndBindEmail: vi.fn(),
-  sendMobileBindCode: vi.fn(),
-  verifyAndBindMobile: vi.fn(),
-  updateAvatar: vi.fn()
-}))
-
 // Mock zxcvbn
 vi.mock('zxcvbn', () => ({
   default: vi.fn()
@@ -204,30 +182,6 @@ describe('UserInfo Component', () => {
     vi.clearAllMocks()
 
     // Setup default mock return values
-    vi.mocked(getUser).mockResolvedValue({
-      code: 200,
-      data: {
-        uid: 1001,
-        name: 'Test User',
-        username: 'testuser',
-        email: 'test@example.com',
-        mobile: '13800138000',
-        avatar: 'https://example.com/avatar.jpg',
-        subscription: 'free',
-        registrationType: 0,
-        localIp: '192.168.1.1',
-        macAddress: '00:11:22:33:44:55'
-      }
-    } as any)
-
-    vi.mocked(updateUser).mockResolvedValue({ code: 200 } as any)
-    vi.mocked(changePassword).mockResolvedValue({ code: 200 } as any)
-    vi.mocked(sendEmailBindCode).mockResolvedValue({ code: 200 } as any)
-    vi.mocked(verifyAndBindEmail).mockResolvedValue({ code: 200 } as any)
-    vi.mocked(sendMobileBindCode).mockResolvedValue({ code: 200 } as any)
-    vi.mocked(verifyAndBindMobile).mockResolvedValue({ code: 200 } as any)
-    vi.mocked(updateAvatar).mockResolvedValue({ code: 200 } as any)
-
     vi.mocked(zxcvbn).mockReturnValue({ score: 2 } as any)
 
     // Clear console output for cleaner test results
@@ -245,15 +199,6 @@ describe('UserInfo Component', () => {
 
   describe('Component Rendering - Core Logic', () => {
     it('should not show edit buttons for UID 2000001', async () => {
-      vi.mocked(getUser).mockResolvedValue({
-        code: 200,
-        data: {
-          uid: 2000001,
-          name: 'Test User',
-          username: 'testuser'
-        }
-      } as any)
-
       wrapper = createWrapper()
       await nextTick()
       await nextTick()
@@ -308,21 +253,11 @@ describe('UserInfo Component', () => {
 
       await vm.handleSave()
       await nextTick()
-
-      expect(vi.mocked(updateUser)).toHaveBeenCalledWith({
-        username: 'updateduser',
-        name: 'Updated Name'
-      })
       expect(vi.mocked(message.success)).toHaveBeenCalledWith('Update successful')
       expect(vm.isEditing).toBe(false)
     })
 
     it('should show error message when save fails', async () => {
-      vi.mocked(updateUser).mockResolvedValue({
-        code: 400,
-        message: 'Update failed'
-      } as any)
-
       const editButton = wrapper.find('.edit-icon-btn')
       await editButton.trigger('click')
       await nextTick()
@@ -449,10 +384,6 @@ describe('UserInfo Component', () => {
 
       await vm.handleResetPassword()
       await nextTick()
-
-      expect(vi.mocked(changePassword)).toHaveBeenCalledWith({
-        password: 'newpassword123'
-      })
       expect(vi.mocked(message.success)).toHaveBeenCalledWith('Password reset successful')
       expect(vm.showPasswordModal).toBe(false)
     })
@@ -502,7 +433,6 @@ describe('UserInfo Component', () => {
       await nextTick()
 
       expect(vi.mocked(message.error)).toHaveBeenCalledWith('Invalid email format')
-      expect(vi.mocked(sendEmailBindCode)).not.toHaveBeenCalled()
     })
 
     it('should send email bind code successfully', async () => {
@@ -513,10 +443,6 @@ describe('UserInfo Component', () => {
 
       await vm.handleSendEmailBindCode()
       await nextTick()
-
-      expect(vi.mocked(sendEmailBindCode)).toHaveBeenCalledWith({
-        email: 'newemail@example.com'
-      })
       expect(vi.mocked(message.success)).toHaveBeenCalledWith('Verification code sent')
       expect(vm.emailCodeCountdown).toBe(300)
     })
@@ -553,22 +479,11 @@ describe('UserInfo Component', () => {
 
       await vm.handleVerifyAndBindEmail()
       await nextTick()
-
-      expect(vi.mocked(verifyAndBindEmail)).toHaveBeenCalledWith({
-        email: 'newemail@example.com',
-        code: '123456'
-      })
       expect(vi.mocked(message.success)).toHaveBeenCalledWith('Email binding successful')
       expect(vm.showEmailModal).toBe(false)
-      expect(vi.mocked(getUser)).toHaveBeenCalled()
     })
 
     it('should show error when email binding fails', async () => {
-      vi.mocked(verifyAndBindEmail).mockResolvedValue({
-        code: 400,
-        message: 'Invalid code'
-      } as any)
-
       const vm = wrapper.vm as any
       vm.showEmailModal = true
       vm.emailBindForm.email = 'test@example.com'
@@ -603,7 +518,6 @@ describe('UserInfo Component', () => {
       await nextTick()
 
       expect(vi.mocked(message.error)).toHaveBeenCalledWith('Please enter a valid mobile number')
-      expect(vi.mocked(sendMobileBindCode)).not.toHaveBeenCalled()
     })
 
     it('should send mobile bind code successfully', async () => {
@@ -614,10 +528,6 @@ describe('UserInfo Component', () => {
 
       await vm.handleSendMobileBindCode()
       await nextTick()
-
-      expect(vi.mocked(sendMobileBindCode)).toHaveBeenCalledWith({
-        mobile: '13900139000'
-      })
       expect(vi.mocked(message.success)).toHaveBeenCalledWith('Verification code sent')
       expect(vm.mobileCodeCountdown).toBe(300)
     })
@@ -650,22 +560,11 @@ describe('UserInfo Component', () => {
 
       await vm.handleVerifyAndBindMobile()
       await nextTick()
-
-      expect(vi.mocked(verifyAndBindMobile)).toHaveBeenCalledWith({
-        mobile: '13900139000',
-        code: '123456'
-      })
       expect(vi.mocked(message.success)).toHaveBeenCalledWith('Mobile binding successful')
       expect(vm.showMobileModal).toBe(false)
-      expect(vi.mocked(getUser)).toHaveBeenCalled()
     })
 
     it('should show error when mobile binding fails', async () => {
-      vi.mocked(verifyAndBindMobile).mockResolvedValue({
-        code: 400,
-        message: 'Invalid code'
-      } as any)
-
       const vm = wrapper.vm as any
       vm.showMobileModal = true
       vm.mobileBindForm.mobile = '13900139000'
@@ -684,8 +583,6 @@ describe('UserInfo Component', () => {
       wrapper = createWrapper()
       await nextTick()
       await nextTick()
-
-      expect(vi.mocked(getUser)).toHaveBeenCalledWith({})
     })
 
     it('should update device info from store', async () => {
@@ -707,29 +604,15 @@ describe('UserInfo Component', () => {
       await nextTick()
 
       const vm = wrapper.vm as any
-      vi.mocked(getUser).mockClear()
-
       vm.formState.name = 'Updated Name'
       vm.formState.username = 'updateduser'
       await vm.handleSave()
       await nextTick()
-
-      expect(vi.mocked(getUser)).toHaveBeenCalled()
     })
   })
 
   describe('Error Handling', () => {
     it('should handle API error with response message', async () => {
-      const error = {
-        response: {
-          data: {
-            message: 'Custom error message'
-          }
-        }
-      }
-
-      vi.mocked(updateUser).mockRejectedValue(error)
-
       wrapper = createWrapper()
       await nextTick()
       await nextTick()
@@ -747,10 +630,6 @@ describe('UserInfo Component', () => {
     })
 
     it('should handle API error with default message', async () => {
-      const error = new Error('Network error')
-
-      vi.mocked(updateUser).mockRejectedValue(error)
-
       wrapper = createWrapper()
       await nextTick()
       await nextTick()
@@ -770,17 +649,6 @@ describe('UserInfo Component', () => {
 
   describe('Registration Type - Edit Button Visibility', () => {
     it('should not allow mobile editing for mobile registered users (registrationType === 7)', async () => {
-      vi.mocked(getUser).mockResolvedValue({
-        code: 200,
-        data: {
-          uid: 1001,
-          name: 'Test User',
-          username: 'testuser',
-          mobile: '13800138000',
-          registrationType: 7
-        }
-      } as any)
-
       wrapper = createWrapper()
       await nextTick()
       await nextTick()
@@ -790,17 +658,6 @@ describe('UserInfo Component', () => {
     })
 
     it('should not allow email editing for email registered users (registrationType === 2)', async () => {
-      vi.mocked(getUser).mockResolvedValue({
-        code: 200,
-        data: {
-          uid: 1001,
-          name: 'Test User',
-          username: 'testuser',
-          email: 'test@example.com',
-          registrationType: 2
-        }
-      } as any)
-
       wrapper = createWrapper()
       await nextTick()
       await nextTick()
@@ -810,17 +667,6 @@ describe('UserInfo Component', () => {
     })
 
     it('should allow mobile editing for non-mobile registered users', async () => {
-      vi.mocked(getUser).mockResolvedValue({
-        code: 200,
-        data: {
-          uid: 1001,
-          name: 'Test User',
-          username: 'testuser',
-          mobile: '13800138000',
-          registrationType: 2 // Email registered, can edit mobile
-        }
-      } as any)
-
       wrapper = createWrapper()
       await nextTick()
       await nextTick()
@@ -830,17 +676,6 @@ describe('UserInfo Component', () => {
     })
 
     it('should allow email editing for non-email registered users', async () => {
-      vi.mocked(getUser).mockResolvedValue({
-        code: 200,
-        data: {
-          uid: 1001,
-          name: 'Test User',
-          username: 'testuser',
-          email: 'test@example.com',
-          registrationType: 7 // Mobile registered, can edit email
-        }
-      } as any)
-
       wrapper = createWrapper()
       await nextTick()
       await nextTick()
@@ -850,18 +685,6 @@ describe('UserInfo Component', () => {
     })
 
     it('should allow both mobile and email editing for username registered users', async () => {
-      vi.mocked(getUser).mockResolvedValue({
-        code: 200,
-        data: {
-          uid: 1001,
-          name: 'Test User',
-          username: 'testuser',
-          email: 'test@example.com',
-          mobile: '13800138000',
-          registrationType: 0 // Username registered, can edit both
-        }
-      } as any)
-
       wrapper = createWrapper()
       await nextTick()
       await nextTick()
@@ -872,18 +695,6 @@ describe('UserInfo Component', () => {
     })
 
     it('should allow editing when registrationType is undefined', async () => {
-      vi.mocked(getUser).mockResolvedValue({
-        code: 200,
-        data: {
-          uid: 1001,
-          name: 'Test User',
-          username: 'testuser',
-          email: 'test@example.com',
-          mobile: '13800138000'
-          // registrationType is undefined
-        }
-      } as any)
-
       wrapper = createWrapper()
       await nextTick()
       await nextTick()
@@ -897,11 +708,6 @@ describe('UserInfo Component', () => {
 
   describe('Edge Cases', () => {
     it('should handle empty user info gracefully', async () => {
-      vi.mocked(getUser).mockResolvedValue({
-        code: 200,
-        data: {}
-      } as any)
-
       wrapper = createWrapper()
       await nextTick()
       await nextTick()
@@ -1317,17 +1123,10 @@ describe('UserInfo Component', () => {
       vm.zoomValue = 1.0
       vm.imagePosition.x = 0
       vm.imagePosition.y = 0
-
-      vi.mocked(updateAvatar).mockResolvedValue({ code: 200 } as any)
-      vi.mocked(getUser).mockClear()
-
       await vm.handleSaveAvatar()
       await nextTick()
-
-      expect(vi.mocked(updateAvatar)).toHaveBeenCalled()
       expect(vi.mocked(message.success)).toHaveBeenCalledWith('Avatar updated successfully')
       expect(vm.showAvatarModal).toBe(false)
-      expect(vi.mocked(getUser)).toHaveBeenCalled()
     })
 
     it('should handle avatar save failure', async () => {
@@ -1367,12 +1166,6 @@ describe('UserInfo Component', () => {
       vm.zoomValue = 1.0
       vm.imagePosition.x = 0
       vm.imagePosition.y = 0
-
-      vi.mocked(updateAvatar).mockResolvedValue({
-        code: 400,
-        message: 'Avatar update failed'
-      } as any)
-
       await vm.handleSaveAvatar()
       await nextTick()
 
@@ -1418,16 +1211,6 @@ describe('UserInfo Component', () => {
       vm.imagePosition.x = 0
       vm.imagePosition.y = 0
 
-      const error = {
-        response: {
-          data: {
-            message: 'Network error'
-          }
-        }
-      }
-
-      vi.mocked(updateAvatar).mockRejectedValue(error)
-
       await vm.handleSaveAvatar()
       await nextTick()
 
@@ -1443,8 +1226,6 @@ describe('UserInfo Component', () => {
 
       await vm.handleSaveAvatar()
       await nextTick()
-
-      expect(vi.mocked(updateAvatar)).not.toHaveBeenCalled()
     })
 
     it('should reset avatar preview state', async () => {
