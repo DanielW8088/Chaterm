@@ -205,9 +205,21 @@
           <CloudOutlined :class="['kb-capacity-icon', { 'kb-capacity-icon-syncing': isSyncing }]" />
           <div class="kb-capacity-info">
             <div class="kb-capacity-label">{{ $t('knowledgeCenter.myCapacity') }}</div>
-            <div class="kb-capacity-value">{{ formatCapacity(cloudStorage.usedBytes) }} / {{ formatCapacity(displayTotalBytes) }}</div>
+            <div
+              v-if="displayTotalBytes < 0"
+              class="kb-capacity-value"
+            >
+              {{ formatCapacity(cloudStorage.usedBytes) }}
+            </div>
+            <div
+              v-else
+              class="kb-capacity-value"
+            >
+              {{ formatCapacity(cloudStorage.usedBytes) }} / {{ formatCapacity(displayTotalBytes) }}
+            </div>
           </div>
           <a
+            v-if="displayTotalBytes >= 0"
             class="kb-capacity-detail-link"
             @click.prevent="showCapacityDetail = true"
             >{{ $t('knowledgeCenter.capacityDetail') }}</a
@@ -299,7 +311,7 @@ type TreeNode = {
 const { t } = useI18n()
 const api = window.api
 
-const cloudStorage = ref({ usedBytes: 0, totalBytes: 1024 * 1024 * 1024 })
+const cloudStorage = ref({ usedBytes: 0, totalBytes: -1 })
 const showCapacityDetail = ref(false)
 const isDeletingCount = ref(0)
 const subscription = ref<string | undefined>(undefined)
@@ -341,7 +353,7 @@ async function loadCloudStorage(): Promise<void> {
   try {
     if (api?.getKbCloudStorage) {
       const res = await api.getKbCloudStorage()
-      cloudStorage.value = { usedBytes: res.usedBytes ?? 0, totalBytes: res.totalBytes ?? 1024 * 1024 * 1024 }
+      cloudStorage.value = { usedBytes: res.usedBytes ?? 0, totalBytes: res.totalBytes ?? -1 }
     }
   } catch {
     // keep default

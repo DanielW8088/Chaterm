@@ -22,8 +22,9 @@ import {
 
 let mockUserDataPath = ''
 
-const apiClientModuleMock = vi.hoisted(() => ({
-  ApiClient: vi.fn()
+const r2ClientModuleMock = vi.hoisted(() => ({
+  getR2Config: vi.fn(),
+  createR2Client: vi.fn()
 }))
 
 vi.mock('electron', () => ({
@@ -35,7 +36,7 @@ vi.mock('electron', () => ({
   }
 }))
 
-vi.mock('../../../storage/data_sync/core/ApiClient', () => apiClientModuleMock)
+vi.mock('../r2Client', () => r2ClientModuleMock)
 
 vi.mock('../index', () => ({
   getKnowledgeBaseRoot: () => path.join(mockUserDataPath, 'knowledgebase'),
@@ -251,18 +252,20 @@ describe('flushDeletes batching', () => {
   })
 
   it('splits delete requests into batches and updates snapshot/usedBytes', async () => {
-    const post = vi.fn(async (_url: string, data?: any) => {
-      const relPaths: string[] = data?.relPaths ?? []
-      const results: Record<string, any> = {}
-      for (const p of relPaths) results[p] = { status: DeleteItemStatus.DeleteStatusOK }
-      return { results }
+    const deleteObjects = vi.fn(async (_keys: string[]) => {})
+    const putObject = vi.fn(async () => {})
+    r2ClientModuleMock.getR2Config.mockResolvedValue({
+      accountId: 'test',
+      accessKeyId: 'key',
+      secretAccessKey: 'secret',
+      bucketName: 'bucket'
     })
-    apiClientModuleMock.ApiClient.mockImplementation(function () {
-      return {
-        isAuthenticated: vi.fn(async () => true),
-        post,
-        destroy: vi.fn()
-      }
+    r2ClientModuleMock.createR2Client.mockReturnValue({
+      deleteObjects,
+      putObject,
+      getObject: vi.fn(async () => null),
+      listObjects: vi.fn(async () => []),
+      testConnection: vi.fn(async () => ({ success: true }))
     })
 
     const total = DELETE_BATCH_SIZE * 2 + 1
@@ -276,12 +279,11 @@ describe('flushDeletes batching', () => {
     expect(__testOnly.getFlags().flushInProgress).toBe(false)
     await __testOnly.flushDeletes()
 
-    expect(apiClientModuleMock.ApiClient).toHaveBeenCalled()
-    expect(post).toHaveBeenCalledTimes(3)
-    expect(post.mock.calls[0][0]).toBe('/kb/delete')
-    expect(post.mock.calls[0][1].relPaths).toHaveLength(DELETE_BATCH_SIZE)
-    expect(post.mock.calls[1][1].relPaths).toHaveLength(DELETE_BATCH_SIZE)
-    expect(post.mock.calls[2][1].relPaths).toHaveLength(1)
+    // deleteObjects should be called once per batch (DELETE_BATCH_SIZE items each)
+    expect(deleteObjects).toHaveBeenCalledTimes(3)
+    expect(deleteObjects.mock.calls[0][0]).toHaveLength(DELETE_BATCH_SIZE)
+    expect(deleteObjects.mock.calls[1][0]).toHaveLength(DELETE_BATCH_SIZE)
+    expect(deleteObjects.mock.calls[2][0]).toHaveLength(1)
 
     const snap = await readLocalSnapshot()
     expect(snap).not.toBeNull()

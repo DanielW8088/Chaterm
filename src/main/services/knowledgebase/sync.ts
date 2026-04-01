@@ -1,19 +1,23 @@
 /**
  * Knowledge base sync: full sync on startup, incremental upload/delete on file events.
  * - On startup: full sync (download from cloud, upload local-only changes, delete cloud orphans).
- * - Runtime: add/change → upload only; unlink → delete only.
+ * - Runtime: add/change -> upload only; unlink -> delete only.
+ * - Uses Cloudflare R2 (S3-compatible) for remote storage when configured.
+ * - If R2 is not configured, sync is silently skipped.
  */
 
 import { app } from 'electron'
 import path from 'path'
 import * as fs from 'fs/promises'
 import { createLogger } from '../logging'
-import { ApiClient } from '../../storage/data_sync/core/ApiClient'
-import { getKnowledgeBaseRoot, IMAGE_EXTS, getKbSearchManager } from './index'
+import { getKnowledgeBaseRoot, getKbSearchManager } from './index'
+import { getR2Config, createR2Client } from './r2Client'
+import type { R2Client } from './r2Client'
 
 const logger = createLogger('kb-sync')
 
 const KB_SYNC_EXCLUDED_BASENAME = '.kb-default-seeds-meta.json'
+const R2_MANIFEST_KEY = 'manifest.json'
 export const KB_SYNC_DEBOUNCE_MS = 5000
 export const DELETE_BATCH_SIZE = 20
 export const UPLOAD_BATCH_SIZE = 20
@@ -29,6 +33,10 @@ interface SnapshotData {
   updatedAt: number
   entries: KbManifestEntry[]
   usedBytes?: number
+}
+
+interface R2Manifest {
+  entries: Record<string, KbManifestEntry>
 }
 
 function normalizeRelPath(relPath: string): string {
@@ -150,7 +158,7 @@ export function diffManifest(L_now: KbManifestEntry[], L_last: KbManifestEntry[]
 export type KbUploadOutcomeStatus = 'ok' | 'skipped' | 'failed' | 'unspecified'
 export type KbDeleteOutcomeStatus = 'ok' | 'skipped' | 'not_found' | 'failed' | 'unspecified'
 
-// Keep numeric values aligned with backend proto enum (int32).
+// Keep numeric values aligned with previous enum definitions for test compatibility.
 export enum UploadItemStatus {
   UploadStatusUnspecified = 0,
   UploadStatusOK = 1,
@@ -158,7 +166,6 @@ export enum UploadItemStatus {
   UploadStatusFailed = 3
 }
 
-// Keep numeric values aligned with backend proto enum (int32).
 export enum DeleteItemStatus {
   DeleteStatusUnspecified = 0,
   DeleteStatusOK = 1,
@@ -275,6 +282,26 @@ export function getKbSyncLastResults(): KbSyncLastRunResults {
   }
 }
 
+// --- R2 manifest helpers ---
+
+async function readR2Manifest(r2: R2Client): Promise<R2Manifest | null> {
+  try {
+    const buf = await r2.getObject(R2_MANIFEST_KEY)
+    if (!buf) return null
+    return JSON.parse(buf.toString('utf-8')) as R2Manifest
+  } catch {
+    return null
+  }
+}
+
+async function writeR2Manifest(r2: R2Client, entries: KbManifestEntry[]): Promise<void> {
+  const manifest: R2Manifest = {
+    entries: Object.fromEntries(entries.map((e) => [e.relPath, e]))
+  }
+  const buf = Buffer.from(JSON.stringify(manifest, null, 2), 'utf-8')
+  await r2.putObject(R2_MANIFEST_KEY, buf)
+}
+
 // --- Runtime state ---
 
 let fullSyncInProgress = false
@@ -290,25 +317,20 @@ interface KbSyncWatcher {
 }
 
 let watcher: KbSyncWatcher | null = null
-let apiClient: ApiClient | null = null
 
-function getApiClient(): ApiClient {
-  if (!apiClient) {
-    // Disable keepAlive to avoid ECONNRESET when reusing a connection
-    // that the server has already closed between the manifest GET and upload POSTs.
-    apiClient = new ApiClient({ keepAlive: false })
-  }
-  return apiClient
+async function getR2Client(): Promise<R2Client | null> {
+  const cfg = await getR2Config()
+  if (!cfg) return null
+  return createR2Client(cfg)
 }
 
 // --- Full sync (startup / manual) ---
 
 export async function runKbFullSync(): Promise<void> {
   if (fullSyncInProgress) return
-  const client = getApiClient()
-  const hasAuth = await client.isAuthenticated()
-  if (!hasAuth) {
-    logger.info('KB sync skipped: not authenticated')
+  const r2 = await getR2Client()
+  if (!r2) {
+    logger.info('KB sync skipped: R2 not configured')
     return
   }
   fullSyncInProgress = true
@@ -317,8 +339,8 @@ export async function runKbFullSync(): Promise<void> {
   try {
     await fs.mkdir(getKbRoot(), { recursive: true })
 
-    const manifestRes = (await client.get('/kb/manifest')) as { entries?: Record<string, KbManifestEntry> } | undefined
-    const entriesMap = manifestRes?.entries ?? {}
+    const r2Manifest = await readR2Manifest(r2)
+    const entriesMap: Record<string, KbManifestEntry> = r2Manifest?.entries ?? {}
     const cloudSizes = new Map<string, number>()
     for (const entry of Object.values(entriesMap)) {
       if (entry?.relPath && !isKbSyncExcludedRelPath(entry.relPath)) {
@@ -348,18 +370,10 @@ export async function runKbFullSync(): Promise<void> {
       }
 
       try {
-        const fileRes = (await client.get('/kb/file', {
-          params: { relPath: entry.relPath }
-        })) as { content?: string; encoding?: string } | undefined
-        const content = fileRes?.content
-        const encoding = fileRes?.encoding ?? 'utf-8'
-        if (content == null) continue
+        const buf = await r2.getObject(entry.relPath)
+        if (!buf) continue
         await fs.mkdir(path.dirname(absPath), { recursive: true })
-        if (encoding === 'base64') {
-          await fs.writeFile(absPath, Buffer.from(content, 'base64'))
-        } else {
-          await fs.writeFile(absPath, content, 'utf-8')
-        }
+        await fs.writeFile(absPath, buf)
         logger.info('KB sync downloaded', { relPath: entry.relPath })
         downloadedRelPaths.add(entry.relPath)
       } catch (e: any) {
@@ -376,47 +390,22 @@ export async function runKbFullSync(): Promise<void> {
     const uploadOutcomes: KbSyncPathOutcome[] = []
     const uploadSuccessRelPaths = new Set<string>()
 
-    // Upload in batches to avoid oversized request bodies.
-    const UPLOAD_BATCH_SIZE = 20
+    // Upload files to R2 one at a time (batched in groups for progress tracking).
     for (let batchStart = 0; batchStart < toUpload.length; batchStart += UPLOAD_BATCH_SIZE) {
       const batch = toUpload.slice(batchStart, batchStart + UPLOAD_BATCH_SIZE)
-      try {
-        const files = await Promise.all(
-          batch.map(async (e) => {
-            const { absPath } = resolveKbPath(e.relPath)
-            const ext = path.extname(e.relPath).toLowerCase()
-            const isBinary = IMAGE_EXTS.has(ext)
-            const content = isBinary ? (await fs.readFile(absPath)).toString('base64') : await fs.readFile(absPath, 'utf-8')
-            return { relPath: e.relPath, content, encoding: isBinary ? 'base64' : 'utf-8', mtimeMs: e.mtimeMs, size: e.size }
-          })
-        )
-        const uploadReply = (await client.post('/kb/upload', { files })) as {
-          results?: Record<string, { status?: unknown; message?: string }>
-        }
-        for (const e of batch) {
-          const item = uploadReply?.results?.[e.relPath]
-          const st = parseKbUploadStatus(item?.status)
-          const message = typeof item?.message === 'string' ? item.message : ''
-          if (st === 'ok') {
-            usedBytes = adjustUsedBytesAfterUploadOk(usedBytes, cloudSizes, e)
-            uploadSuccessRelPaths.add(e.relPath)
-            logger.info('KB sync uploaded', { relPath: e.relPath, status: st })
-          } else {
-            logger.warn(`KB sync upload failed for ${e.relPath}`, { status: st, message: message || undefined })
-          }
-          uploadOutcomes.push({ relPath: e.relPath, kind: 'upload', status: st, message })
-        }
-      } catch (err: any) {
-        const msg = err?.message ?? 'request failed'
-        const originalMsg = (err as any)?.originalError?.message
-        const statusCode = (err as any)?.originalError?.response?.status
-        logger.warn(`KB sync batch upload failed (batch ${batchStart / UPLOAD_BATCH_SIZE + 1})`, {
-          error: msg,
-          ...(originalMsg && { originalError: originalMsg }),
-          ...(statusCode && { httpStatus: statusCode })
-        })
-        for (const e of batch) {
+      for (const e of batch) {
+        try {
+          const { absPath } = resolveKbPath(e.relPath)
+          const content = await fs.readFile(absPath)
+          await r2.putObject(e.relPath, content)
+          usedBytes = adjustUsedBytesAfterUploadOk(usedBytes, cloudSizes, e)
+          uploadSuccessRelPaths.add(e.relPath)
+          uploadOutcomes.push({ relPath: e.relPath, kind: 'upload', status: 'ok', message: '' })
+          logger.info('KB sync uploaded', { relPath: e.relPath })
+        } catch (err: any) {
+          const msg = err?.message ?? 'upload failed'
           uploadOutcomes.push({ relPath: e.relPath, kind: 'upload', status: 'failed', message: msg })
+          logger.warn(`KB sync upload failed for ${e.relPath}`, { error: msg })
         }
       }
     }
@@ -424,25 +413,15 @@ export async function runKbFullSync(): Promise<void> {
     const deleteOutcomes: KbSyncPathOutcome[] = []
     if (toDelete.length > 0) {
       try {
-        const deleteReply = (await client.post('/kb/delete', { relPaths: toDelete })) as {
-          results?: Record<string, { status?: unknown; message?: string }>
-        }
+        await r2.deleteObjects(toDelete)
         for (const relPath of toDelete) {
-          const item = deleteReply?.results?.[relPath]
-          const st = parseKbDeleteStatus(item?.status)
-          const message = typeof item?.message === 'string' ? item.message : ''
-          if (st === 'ok') {
-            const sz =
-              cloudSizes.get(relPath) ?? (entriesMap as Record<string, KbManifestEntry>)[relPath]?.size ?? lastEntriesMap.get(relPath)?.size ?? 0
-            if (!isKbSyncExcludedRelPath(relPath) && sz > 0) {
-              usedBytes -= sz
-            }
-            cloudSizes.delete(relPath)
-            logger.info('KB sync deleted', { relPath, status: st })
-          } else {
-            logger.warn(`KB sync delete not applied for ${relPath}`, { status: st, message: message || undefined })
+          const sz = cloudSizes.get(relPath) ?? entriesMap[relPath]?.size ?? lastEntriesMap.get(relPath)?.size ?? 0
+          if (!isKbSyncExcludedRelPath(relPath) && sz > 0) {
+            usedBytes -= sz
           }
-          deleteOutcomes.push({ relPath, kind: 'delete', status: st, message })
+          cloudSizes.delete(relPath)
+          deleteOutcomes.push({ relPath, kind: 'delete', status: 'ok', message: '' })
+          logger.info('KB sync deleted', { relPath })
         }
       } catch (err: any) {
         const msg = err?.message ?? 'delete request failed'
@@ -461,11 +440,17 @@ export async function runKbFullSync(): Promise<void> {
 
     const snapshotEntries = buildSnapshotEntriesAfterUpload(L_now, L_last?.entries ?? null, toUpload, uploadSuccessRelPaths)
     await writeLocalSnapshot(snapshotEntries, Math.max(0, usedBytes))
+
+    // Update R2 manifest to reflect current state after sync.
+    try {
+      await writeR2Manifest(r2, snapshotEntries)
+    } catch (e: any) {
+      logger.warn('KB sync: failed to write R2 manifest', { error: e?.message })
+    }
   } catch (e: any) {
     logger.warn('KB sync failed', { error: e?.message })
   } finally {
     // Remove any watcher-triggered upload intents for files we just downloaded.
-    // This prevents the "download -> add event -> upload again" loop.
     for (const p of downloadedRelPaths) pendingUpload.delete(p)
     fullSyncInProgress = false
     // Flush any incremental operations that accumulated while full sync was running.
@@ -511,15 +496,13 @@ async function flushUploads(): Promise<void> {
   const paths = Array.from(pendingUpload)
   pendingUpload.clear()
 
-  const client = getApiClient()
-  const hasAuth = await client.isAuthenticated()
-  if (!hasAuth) return
+  const r2 = await getR2Client()
+  if (!r2) return
 
   flushInProgress = true
   try {
     const snapshot = await readLocalSnapshot()
     const snapshotMap = new Map((snapshot?.entries ?? []).map((e) => [e.relPath, e]))
-    // Use snapshot sizes as cloud-size proxy (valid because snapshot tracks last successful upload).
     const cloudSizes = new Map<string, number>(Array.from(snapshotMap.values()).map((e) => [e.relPath, e.size]))
     let usedBytes = snapshot?.usedBytes ?? 0
 
@@ -539,34 +522,16 @@ async function flushUploads(): Promise<void> {
     if (toUpload.length === 0) return
 
     const uploadSuccessRelPaths = new Set<string>()
-    for (let i = 0; i < toUpload.length; i += UPLOAD_BATCH_SIZE) {
-      const batch = toUpload.slice(i, i + UPLOAD_BATCH_SIZE)
+    for (const e of toUpload) {
       try {
-        const files = await Promise.all(
-          batch.map(async (e) => {
-            const { absPath } = resolveKbPath(e.relPath)
-            const ext = path.extname(e.relPath).toLowerCase()
-            const isBinary = IMAGE_EXTS.has(ext)
-            const content = isBinary ? (await fs.readFile(absPath)).toString('base64') : await fs.readFile(absPath, 'utf-8')
-            return { relPath: e.relPath, content, encoding: isBinary ? 'base64' : 'utf-8', mtimeMs: e.mtimeMs, size: e.size }
-          })
-        )
-        const reply = (await client.post('/kb/upload', { files })) as {
-          results?: Record<string, { status?: unknown; message?: string }>
-        }
-        logger.debug('KB sync upload raw reply', { reply: JSON.stringify(reply) })
-        for (const e of batch) {
-          const st = parseKbUploadStatus(reply?.results?.[e.relPath]?.status)
-          if (st === 'ok') {
-            usedBytes = adjustUsedBytesAfterUploadOk(usedBytes, cloudSizes, e)
-            uploadSuccessRelPaths.add(e.relPath)
-            logger.info('KB sync incremental uploaded', { relPath: e.relPath })
-          } else {
-            logger.warn(`KB sync incremental upload failed for ${e.relPath}`, { status: st })
-          }
-        }
+        const { absPath } = resolveKbPath(e.relPath)
+        const content = await fs.readFile(absPath)
+        await r2.putObject(e.relPath, content)
+        usedBytes = adjustUsedBytesAfterUploadOk(usedBytes, cloudSizes, e)
+        uploadSuccessRelPaths.add(e.relPath)
+        logger.info('KB sync incremental uploaded', { relPath: e.relPath })
       } catch (err: any) {
-        logger.warn('KB sync incremental upload batch failed', { error: err?.message })
+        logger.warn(`KB sync incremental upload failed for ${e.relPath}`, { error: err?.message })
       }
     }
 
@@ -577,7 +542,15 @@ async function flushUploads(): Promise<void> {
         existingMap.set(e.relPath, e)
       }
     }
-    await writeLocalSnapshot(Array.from(existingMap.values()), Math.max(0, usedBytes))
+    const newEntries = Array.from(existingMap.values())
+    await writeLocalSnapshot(newEntries, Math.max(0, usedBytes))
+
+    // Update R2 manifest.
+    try {
+      await writeR2Manifest(r2, newEntries)
+    } catch (e: any) {
+      logger.warn('KB sync: failed to write R2 manifest after incremental upload', { error: e?.message })
+    }
   } finally {
     flushInProgress = false
   }
@@ -611,9 +584,8 @@ async function flushDeletes(): Promise<void> {
   const paths = Array.from(pendingDelete)
   pendingDelete.clear()
 
-  const client = getApiClient()
-  const hasAuth = await client.isAuthenticated()
-  if (!hasAuth) return
+  const r2 = await getR2Client()
+  if (!r2) return
 
   flushInProgress = true
   try {
@@ -624,19 +596,10 @@ async function flushDeletes(): Promise<void> {
     for (let i = 0; i < paths.length; i += DELETE_BATCH_SIZE) {
       const batch = paths.slice(i, i + DELETE_BATCH_SIZE)
       try {
-        const reply = (await client.post('/kb/delete', { relPaths: batch })) as {
-          results?: Record<string, { status?: unknown; message?: string }>
-        }
-        logger.debug('KB sync delete raw reply', { reply: JSON.stringify(reply) })
+        await r2.deleteObjects(batch)
         for (const relPath of batch) {
-          const st = parseKbDeleteStatus(reply?.results?.[relPath]?.status)
-          // Treat not_found as success — cloud already doesn't have it.
-          if (st === 'ok' || st === 'not_found') {
-            successDeleted.add(relPath)
-            logger.info('KB sync incremental deleted', { relPath, status: st })
-          } else {
-            logger.warn(`KB sync incremental delete failed for ${relPath}`, { status: st })
-          }
+          successDeleted.add(relPath)
+          logger.info('KB sync incremental deleted', { relPath })
         }
       } catch (err: any) {
         logger.warn('KB sync incremental delete batch failed', {
@@ -652,6 +615,13 @@ async function flushDeletes(): Promise<void> {
       .reduce((acc, e) => acc + e.size, 0)
     const newEntries = snapshotEntries.filter((e) => !successDeleted.has(e.relPath))
     await writeLocalSnapshot(newEntries, Math.max(0, (snapshot?.usedBytes ?? 0) - removedSize))
+
+    // Update R2 manifest.
+    try {
+      await writeR2Manifest(r2, newEntries)
+    } catch (e: any) {
+      logger.warn('KB sync: failed to write R2 manifest after incremental delete', { error: e?.message })
+    }
   } finally {
     flushInProgress = false
   }
@@ -685,7 +655,7 @@ export function startKbSync(): void {
         getKbSearchManager()?.onFileChanged(rel)
       }
     })
-    // unlink: delete + search index cleanup. unlinkDir fires individual unlink events for contained files.
+    // unlink: delete + search index cleanup.
     watcher.on('unlink', (absPath?: string) => {
       if (!absPath) return
       const rel = absToRelPath(absPath)
@@ -714,10 +684,6 @@ export async function stopKbSync(): Promise<void> {
     await watcher.close()
     watcher = null
   }
-  if (apiClient) {
-    apiClient.destroy()
-    apiClient = null
-  }
   logger.info('KB sync stopped')
 }
 
@@ -733,9 +699,6 @@ export function getKbSyncStatus(): { status: 'idle' | 'syncing' } {
   return { status: fullSyncInProgress || flushInProgress ? 'syncing' : 'idle' }
 }
 
-/** Total cloud quota in bytes for free tier (1 GB). */
-export const KB_CLOUD_TOTAL_BYTES = 1024 * 1024 * 1024
-
 export async function getKbCloudUsedBytes(): Promise<number> {
   const snapshot = await readLocalSnapshot()
   return snapshot?.usedBytes ?? 0
@@ -749,9 +712,6 @@ export const __testOnly = {
   },
   getPendingDeleteSize: () => pendingDelete.size,
   getFlags: () => ({ fullSyncInProgress, flushInProgress, hasDeleteTimer: deleteTimer !== null }),
-  setApiClient: (client: ApiClient | null) => {
-    apiClient = client
-  },
   resetState: () => {
     if (uploadTimer) {
       clearTimeout(uploadTimer)
@@ -765,9 +725,5 @@ export const __testOnly = {
     pendingDelete.clear()
     fullSyncInProgress = false
     flushInProgress = false
-    if (apiClient) {
-      apiClient.destroy()
-      apiClient = null
-    }
   }
 }

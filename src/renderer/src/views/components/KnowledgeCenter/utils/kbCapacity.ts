@@ -1,3 +1,8 @@
+/**
+ * KB capacity helpers. With Cloudflare R2, there are no built-in quota limits.
+ * These stubs are kept for API compatibility with existing call sites.
+ */
+
 export type SubscriptionTier = 'free' | 'lite' | 'pro' | 'ultra' | 'unknown'
 
 export interface KbCapacityDisplay {
@@ -5,13 +10,7 @@ export interface KbCapacityDisplay {
   totalBytes: number
 }
 
-const GIB = 1024 * 1024 * 1024
-
-export function resolveKbCapacityDisplay(subscription?: string): KbCapacityDisplay {
-  const raw = (subscription ?? '').trim().toLowerCase()
-  const tier: SubscriptionTier =
-    raw === 'pro' ? 'pro' : raw === 'ultra' ? 'ultra' : raw === 'lite' ? 'lite' : raw === 'free' || raw === '' ? 'free' : 'unknown'
-
-  const totalBytes = tier === 'pro' || tier === 'ultra' ? 50 * GIB : 1 * GIB
-  return { tier, totalBytes }
+export function resolveKbCapacityDisplay(_subscription?: string): KbCapacityDisplay {
+  // No quota limits with R2 - return unlimited (represented as -1).
+  return { tier: 'unknown', totalBytes: -1 }
 }

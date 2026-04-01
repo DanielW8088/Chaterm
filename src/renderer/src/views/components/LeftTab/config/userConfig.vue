@@ -88,6 +88,13 @@
           <TrustedDevices :is-active="activeKey === '13'" />
         </a-tab-pane>
         <a-tab-pane
+          key="14"
+          :tab="$t('cloudStorage.tabTitle')"
+          type="card"
+        >
+          <CloudStorage />
+        </a-tab-pane>
+        <a-tab-pane
           key="10"
           :tab="$t('user.privacy')"
           type="card"
@@ -129,6 +136,7 @@ import Model from '@/views/components/LeftTab/setting/model.vue'
 import Shortcuts from '@/views/components/LeftTab/setting/shortcuts.vue'
 import Privacy from '@/views/components/LeftTab/setting/privacy.vue'
 import TrustedDevices from '@/views/components/LeftTab/setting/trustedDevices.vue'
+import CloudStorage from '@/views/components/LeftTab/setting/cloudStorage.vue'
 import Rules from '@/views/components/LeftTab/setting/rules.vue'
 import About from '@/views/components/LeftTab/setting/about.vue'
 import Mcp from '@/views/components/LeftTab/setting/mcp.vue'

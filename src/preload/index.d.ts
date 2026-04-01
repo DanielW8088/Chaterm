@@ -396,6 +396,25 @@ interface ApiType {
     deletes: Array<{ relPath: string; kind: 'upload' | 'delete'; status: string; message: string }>
   }>
   getKbCloudStorage: () => Promise<{ usedBytes: number; totalBytes: number }>
+  r2ConfigGet: () => Promise<{
+    success: boolean
+    config: { accountId: string; accessKeyId: string; secretAccessKey: string; bucketName: string; customDomain?: string } | null
+  }>
+  r2ConfigSet: (cfg: {
+    accountId: string
+    accessKeyId: string
+    secretAccessKey: string
+    bucketName: string
+    customDomain?: string
+  }) => Promise<{ success: boolean; error?: string }>
+  r2ConfigClear: () => Promise<{ success: boolean; error?: string }>
+  r2ConfigTest: (cfg: {
+    accountId: string
+    accessKeyId: string
+    secretAccessKey: string
+    bucketName: string
+    customDomain?: string
+  }) => Promise<{ success: boolean; error?: string }>
   getLocalWorkingDirectory: () => Promise<{ success: boolean; cwd: string }>
   getShellsLocal: () => Promise<any>
   agentEnableAndConfigure: (opts: { enabled: boolean }) => Promise<any>

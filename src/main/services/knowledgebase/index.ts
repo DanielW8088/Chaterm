@@ -9,7 +9,9 @@ import { getDefaultLanguage } from '../../config/edition'
 import { getUserConfig } from '../../agent/core/storage/state'
 import { KB_DEFAULT_SEEDS, KB_DEFAULT_SEEDS_VERSION } from './default-seeds'
 import type { KnowledgeBaseDefaultSeed } from './default-seeds'
-import { getKbCloudUsedBytes, KB_CLOUD_TOTAL_BYTES, getKbSyncLastResults } from './sync'
+import { getKbCloudUsedBytes, getKbSyncLastResults } from './sync'
+import { getR2Config, saveR2Config, clearR2Config, createR2Client } from './r2Client'
+import type { R2Config } from './r2Client'
 import { KbSearchManager } from './search/index'
 import type { EmbeddingConfig } from './search/types'
 import { createLogger } from '../logging'
@@ -517,10 +519,43 @@ export function registerKnowledgeBaseHandlers(): void {
 
   ipcMain.handle('kb:get-cloud-storage', async () => {
     const usedBytes = await getKbCloudUsedBytes()
-    return { usedBytes, totalBytes: KB_CLOUD_TOTAL_BYTES }
+    return { usedBytes, totalBytes: -1 }
   })
 
   ipcMain.handle('kb:sync-last-results', async () => getKbSyncLastResults())
+
+  ipcMain.handle('r2:config-get', async () => {
+    const cfg = await getR2Config()
+    return { success: true, config: cfg }
+  })
+
+  ipcMain.handle('r2:config-set', async (_evt, cfg: R2Config) => {
+    try {
+      await saveR2Config(cfg)
+      return { success: true }
+    } catch (e: any) {
+      return { success: false, error: e?.message ?? 'Failed to save R2 config' }
+    }
+  })
+
+  ipcMain.handle('r2:config-clear', async () => {
+    try {
+      await clearR2Config()
+      return { success: true }
+    } catch (e: any) {
+      return { success: false, error: e?.message ?? 'Failed to clear R2 config' }
+    }
+  })
+
+  ipcMain.handle('r2:config-test', async (_evt, cfg: R2Config) => {
+    try {
+      const client = createR2Client(cfg)
+      const result = await client.testConnection()
+      return result
+    } catch (e: any) {
+      return { success: false, error: e?.message ?? 'Connection test failed' }
+    }
+  })
 
   ipcMain.handle('kb:list-dir', async (_evt, payload: { relDir: string }) => {
     const relDir = payload?.relDir ?? ''
