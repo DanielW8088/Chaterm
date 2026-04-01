@@ -562,6 +562,13 @@ export default {
     proxyConfig: 'SSH прокси',
     noProxyConfigFound: 'Не найдена конфигурация прокси',
     goToProxyConfig: 'Перейти к настройкам-терминал-конфигурация прокси',
+    accessKeySection: 'API аутентификация',
+    accessKeyId: 'Access Key ID',
+    accessKeyIdPlaceholder: 'Введите Access Key ID',
+    accessKeySecret: 'Access Key Secret',
+    accessKeySecretPlaceholder: 'Введите Access Key Secret',
+    accessKeyTooltip:
+      'Необязательно. Используется для получения группировки узлов активов из REST API JumpServer. Создайте Access Key в личных настройках JumpServer.',
     personal: 'Подключиться',
     enterprise: 'Сервер bastion',
     editHost: 'Редактировать хост',

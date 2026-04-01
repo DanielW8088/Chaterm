@@ -556,6 +556,13 @@ export default {
     proxyConfig: 'SSHプロキシ',
     noProxyConfigFound: 'プロキシ設定が見つかりません',
     goToProxyConfig: '設定-ターミナル-プロキシ設定に移動',
+    accessKeySection: 'API 認証',
+    accessKeyId: 'Access Key ID',
+    accessKeyIdPlaceholder: 'Access Key IDを入力',
+    accessKeySecret: 'Access Key Secret',
+    accessKeySecretPlaceholder: 'Access Key Secretを入力',
+    accessKeyTooltip:
+      'オプション。JumpServer REST APIからアセットノードグループを取得するために使用します。JumpServerの個人設定でAccess Keyを作成してください。',
     personal: '直接接続',
     enterprise: '堡垒机資産',
     editHost: 'ホストを編集',

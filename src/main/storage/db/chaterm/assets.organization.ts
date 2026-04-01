@@ -1,5 +1,6 @@
 import Database from 'better-sqlite3'
 import JumpServerClient from '../../../ssh/jumpserver/asset'
+import { buildNodeAssetMap } from '../../../ssh/jumpserver/api'
 import { v4 as uuidv4 } from 'uuid'
 import { capabilityRegistry } from '../../../ssh/capabilityRegistry'
 import { getOrganizationAssetTypesWithExisting } from './assets.routes'
@@ -367,6 +368,32 @@ export async function refreshOrganizationAssetsLogic(
       const client = new JumpServerClient(finalConfig, keyboardInteractiveHandler, authResultCallback)
       assets = await client.getAllAssets()
       client.close()
+
+      // Try to fetch node (group) mapping via JumpServer REST API.
+      // Supports Access Key signing (preferred) or username+password authentication.
+      const accessKeyId = jumpServerConfig.accessKeyId || ''
+      const accessKeySecret = jumpServerConfig.accessKeySecret || ''
+      const apiPassword = finalConfig.password || jumpServerConfig.password || ''
+      if (!accessKeyId && !apiPassword) {
+        logger.info('JumpServer node grouping skipped: no Access Key or password available for REST API authentication.')
+      }
+      if (accessKeyId || apiPassword) {
+        try {
+          logger.info('Attempting to fetch JumpServer node mapping via REST API...', { hasAccessKey: !!accessKeyId, hasPassword: !!apiPassword })
+          const nodeMap = await buildNodeAssetMap(finalConfig.host, finalConfig.port, finalConfig.username, apiPassword, accessKeyId, accessKeySecret)
+          if (nodeMap && nodeMap.size > 0) {
+            logger.info('Node mapping retrieved, applying to assets', { mappedAssets: nodeMap.size })
+            for (const asset of assets) {
+              const nodeNames = nodeMap.get(asset.address)
+              if (nodeNames && nodeNames.length > 0) {
+                ;(asset as any).description = nodeNames.join('||')
+              }
+            }
+          }
+        } catch (e: any) {
+          logger.info('JumpServer REST API node fetch skipped', { error: e?.message })
+        }
+      }
     }
 
     logger.info('Assets retrieved, count', { value: assets.length })

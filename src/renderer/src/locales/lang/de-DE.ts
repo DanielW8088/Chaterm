@@ -564,6 +564,13 @@ export default {
     proxyConfig: 'SSH-Proxy',
     noProxyConfigFound: 'Keine Proxy-Konfiguration gefunden',
     goToProxyConfig: 'Gehen Sie zu Einstellungen-Terminal-Proxy-Konfiguration',
+    accessKeySection: 'API-Authentifizierung',
+    accessKeyId: 'Access Key ID',
+    accessKeyIdPlaceholder: 'Access Key ID eingeben',
+    accessKeySecret: 'Access Key Secret',
+    accessKeySecretPlaceholder: 'Access Key Secret eingeben',
+    accessKeyTooltip:
+      'Optional. Wird verwendet, um Asset-Knotengruppierung von der JumpServer REST API abzurufen. Erstellen Sie einen Access Key in den JumpServer-Benutzereinstellungen.',
     personal: 'Verbinden ',
     enterprise: 'Bastion Server',
     editHost: 'Host bearbeiten',

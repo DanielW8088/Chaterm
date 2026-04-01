@@ -183,7 +183,9 @@ const handleAssetEdit = (asset: AssetNode) => {
     port: asset.port || 22,
     asset_type: asset.asset_type || 'person',
     needProxy: asset.needProxy || false,
-    proxyName: asset.proxyName || ''
+    proxyName: asset.proxyName || '',
+    accessKeyId: asset.access_key_id || '',
+    accessKeySecret: asset.access_key_secret || ''
   })
 
   getAssetGroup()
@@ -1253,7 +1255,9 @@ const handleCreateAsset = async (data: AssetFormData) => {
       port: data.port,
       asset_type: data.asset_type,
       needProxy: data.needProxy,
-      proxyName: data.proxyName
+      proxyName: data.proxyName,
+      accessKeyId: data.accessKeyId,
+      accessKeySecret: data.accessKeySecret
     }
 
     const api = window.api as any
@@ -1298,7 +1302,9 @@ const handleSaveAsset = async (data: AssetFormData) => {
       port: data.port,
       asset_type: data.asset_type,
       needProxy: data.needProxy,
-      proxyName: data.proxyName
+      proxyName: data.proxyName,
+      accessKeyId: data.accessKeyId,
+      accessKeySecret: data.accessKeySecret
     }
 
     const api = window.api as any

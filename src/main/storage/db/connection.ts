@@ -234,6 +234,20 @@ function upgradeTAssetsTable(db: Database.Database): void {
       logger.info('Added proxy_name column to t_assets')
     }
 
+    // Additional columns: t_assets.access_key_id, access_key_secret (for JumpServer REST API Access Key signing)
+    try {
+      db.prepare('SELECT access_key_id FROM t_assets LIMIT 1').get()
+    } catch (e) {
+      db.exec("ALTER TABLE t_assets ADD COLUMN access_key_id TEXT DEFAULT ''")
+      logger.info('Added access_key_id column to t_assets')
+    }
+    try {
+      db.prepare('SELECT access_key_secret FROM t_assets LIMIT 1').get()
+    } catch (e) {
+      db.exec("ALTER TABLE t_assets ADD COLUMN access_key_secret TEXT DEFAULT ''")
+      logger.info('Added access_key_secret column to t_assets')
+    }
+
     // Add composite unique constraint: asset_ip + username + port + label + asset_type
     try {
       // Always drop old indexes if they exist

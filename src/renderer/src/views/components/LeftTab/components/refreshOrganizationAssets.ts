@@ -24,6 +24,8 @@ export const handleRefreshOrganizationAssets = async (host: any, onSuccess?: () 
         username: host.username,
         password: host.password,
         keyChain: host.key_chain_id,
+        accessKeyId: host.access_key_id,
+        accessKeySecret: host.access_key_secret,
         connIdentToken: jmsToken
       }
     })

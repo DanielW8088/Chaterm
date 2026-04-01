@@ -70,7 +70,7 @@ const isOrganizationType = (assetType: string): boolean => {
  * An asset with bastion_comment "A||B" belongs to both group A and group B.
  * Assets without bastion_comment are added as direct children.
  */
-function buildQizhiGroupedChildren(orgUuid: string, orgAssetType: string, nodes: any[]): any[] {
+function buildGroupedChildren(orgUuid: string, orgAssetType: string, nodes: any[]): any[] {
   const groupMap = new Map<string, any[]>()
   const ungrouped: any[] = []
 
@@ -284,7 +284,7 @@ export async function getLocalAssetRouteLogic(db: Database, searchType: string, 
 
       for (const group of groups) {
         const assetsStmt = db.prepare(`
-          SELECT label, asset_ip, uuid, group_name, auth_type, port, username, password, key_chain_id, asset_type, favorite, need_proxy, proxy_name
+          SELECT label, asset_ip, uuid, group_name, auth_type, port, username, password, key_chain_id, asset_type, favorite, need_proxy, proxy_name, access_key_id, access_key_secret
           FROM t_assets
           WHERE group_name = ?
           ORDER BY created_at
@@ -311,7 +311,9 @@ export async function getLocalAssetRouteLogic(db: Database, searchType: string, 
               asset_type: item.asset_type || 'person',
               organizationId: isOrganizationType(item.asset_type) ? item.uuid : 'personal',
               needProxy: item.need_proxy === 1,
-              proxyName: item.proxy_name
+              proxyName: item.proxy_name,
+              access_key_id: item.access_key_id || '',
+              access_key_secret: item.access_key_secret || ''
             }))
           })
         }
@@ -522,7 +524,7 @@ export async function getLocalAssetRouteLogic(db: Database, searchType: string, 
 
       // Organization assets (based on available types)
       const organizationAssetsStmt = db.prepare(`
-        SELECT uuid, label, asset_ip, port, username, password, key_chain_id, auth_type, favorite, asset_type
+        SELECT uuid, label, asset_ip, port, username, password, key_chain_id, auth_type, favorite, asset_type, access_key_id, access_key_secret
         FROM t_assets
         WHERE asset_type IN (${orgTypePlaceholders})
         ORDER BY created_at
@@ -538,14 +540,13 @@ export async function getLocalAssetRouteLogic(db: Database, searchType: string, 
         `)
         const nodes = nodesStmt.all(orgAsset.uuid) || []
 
-        // Check if this is a Qizhi organization with asset groups (bastion_comment)
-        const isQizhiType = orgAsset.asset_type === 'organization-qizhi'
-        const hasGroups = isQizhiType && nodes.some((node: any) => node.bastion_comment)
+        // Check if any assets have group info (bastion_comment) for tree grouping
+        const hasGroups = nodes.some((node: any) => node.bastion_comment)
 
         const assetType = orgAsset.asset_type || 'organization'
 
         if (hasGroups) {
-          const children = buildQizhiGroupedChildren(orgAsset.uuid, assetType, nodes)
+          const children = buildGroupedChildren(orgAsset.uuid, assetType, nodes)
           result.data.routers.push({
             key: orgAsset.uuid,
             title: orgAsset.label || orgAsset.asset_ip,

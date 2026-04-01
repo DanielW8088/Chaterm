@@ -253,6 +253,30 @@
           </div>
         </div>
 
+        <!-- Access Key (for bastion host node grouping via JumpServer REST API) -->
+        <div
+          v-if="isOrganizationAsset(formData.asset_type)"
+          class="form-section"
+        >
+          <div class="section-title">
+            <div class="title-indicator"></div>
+            {{ t('personal.accessKeySection') }}
+          </div>
+          <a-form-item :label="t('personal.accessKeyId')">
+            <a-input
+              v-model:value="formData.accessKeyId"
+              :placeholder="t('personal.accessKeyIdPlaceholder')"
+            />
+          </a-form-item>
+          <a-form-item :label="t('personal.accessKeySecret')">
+            <a-input-password
+              v-model:value="formData.accessKeySecret"
+              :placeholder="t('personal.accessKeySecretPlaceholder')"
+            />
+          </a-form-item>
+          <div class="form-item-hint">{{ t('personal.accessKeyTooltip') }}</div>
+        </div>
+
         <!-- General information -->
         <div class="form-section">
           <div class="section-title">
@@ -935,5 +959,12 @@ watch(
 
 :deep(.ant-input-password.error-input .ant-input:hover) {
   border-color: #ff4d4f !important;
+}
+
+.form-item-hint {
+  font-size: 12px;
+  color: var(--text-color-secondary);
+  margin-top: 4px;
+  line-height: 1.4;
 }
 </style>

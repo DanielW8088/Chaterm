@@ -563,6 +563,13 @@ export default {
     proxyConfig: 'Proxy SSH',
     noProxyConfigFound: 'Nenhuma configuração de proxy encontrada',
     goToProxyConfig: 'Ir para Configurações-Terminal-Configuração de proxy',
+    accessKeySection: 'Autenticacao API',
+    accessKeyId: 'Access Key ID',
+    accessKeyIdPlaceholder: 'Insira o Access Key ID',
+    accessKeySecret: 'Access Key Secret',
+    accessKeySecretPlaceholder: 'Insira o Access Key Secret',
+    accessKeyTooltip:
+      'Opcional. Usado para obter o agrupamento de nos de ativos da API REST do JumpServer. Crie um Access Key nas configuracoes pessoais do JumpServer.',
     personal: 'Conectar',
     enterprise: 'Servidor Bastião',
     editHost: 'Editar host',

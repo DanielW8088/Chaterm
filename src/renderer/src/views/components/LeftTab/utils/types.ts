@@ -113,6 +113,8 @@ export interface AssetFormData {
   asset_type: AssetType
   needProxy: boolean
   proxyName: string
+  accessKeyId?: string
+  accessKeySecret?: string
 }
 
 export interface sshProxyConfig {

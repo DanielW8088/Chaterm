@@ -118,6 +118,8 @@ export function createOrUpdateAssetLogic(db: Database.Database, params: any): an
           asset_type = ?,
           need_proxy = ?,
           proxy_name = ?,
+          access_key_id = ?,
+          access_key_secret = ?,
           updated_at = ?,
           version = version + 1
         WHERE uuid = ?
@@ -132,6 +134,8 @@ export function createOrUpdateAssetLogic(db: Database.Database, params: any): an
         form.asset_type || 'person',
         form.needProxy ? 1 : 0,
         form.proxyName,
+        form.accessKeyId || '',
+        form.accessKeySecret || '',
         now,
         existingAsset.uuid
       )
@@ -166,10 +170,12 @@ export function createOrUpdateAssetLogic(db: Database.Database, params: any): an
           asset_type,
           need_proxy,
           proxy_name,
+          access_key_id,
+          access_key_secret,
           created_at,
           updated_at,
           version
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `)
 
     const result = insertStmt.run(
@@ -186,6 +192,8 @@ export function createOrUpdateAssetLogic(db: Database.Database, params: any): an
       form.asset_type || 'person',
       form.needProxy ? 1 : 0,
       form.proxyName,
+      form.accessKeyId || '',
+      form.accessKeySecret || '',
       now,
       now,
       1
@@ -253,10 +261,12 @@ export function createAssetLogic(db: Database.Database, params: any): any {
           asset_type,
           need_proxy,
           proxy_name,
+          access_key_id,
+          access_key_secret,
           created_at,
           updated_at,
           version
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `)
 
     const result = insertStmt.run(
@@ -273,6 +283,8 @@ export function createAssetLogic(db: Database.Database, params: any): any {
       form.asset_type || 'person',
       form.needProxy ? 1 : 0,
       form.proxyName,
+      form.accessKeyId || '',
+      form.accessKeySecret || '',
       now,
       now,
       1
@@ -351,6 +363,8 @@ export function updateAssetLogic(db: Database.Database, params: any): any {
             group_name = ?,
             need_proxy = ?,
             proxy_name = ?,
+            access_key_id = ?,
+            access_key_secret = ?,
             updated_at = ?
         WHERE uuid = ?
       `)
@@ -366,6 +380,8 @@ export function updateAssetLogic(db: Database.Database, params: any): any {
       form.group_name,
       form.needProxy ? 1 : 0,
       form.proxyName || '',
+      form.accessKeyId || '',
+      form.accessKeySecret || '',
       now,
       form.uuid
     )

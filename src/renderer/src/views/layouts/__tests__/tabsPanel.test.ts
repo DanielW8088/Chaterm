@@ -25,13 +25,6 @@ vi.mock('@views/components/Ssh/sshConnect.vue', () => ({
   }
 }))
 
-vi.mock('@views/components/LeftTab/config/userInfo.vue', () => ({
-  default: {
-    name: 'UserInfo',
-    template: '<div class="user-info-mock">User Info</div>'
-  }
-}))
-
 vi.mock('@views/components/LeftTab/config/userConfig.vue', () => ({
   default: {
     name: 'UserConfig',
@@ -298,11 +291,6 @@ describe('TabsPanel Component', () => {
   })
 
   describe('Config Tabs Rendering', () => {
-    it('should render UserInfo when content is userInfo', () => {
-      wrapper = createWrapper({ content: 'userInfo', organizationId: '' })
-      expect(wrapper.html()).toContain('User Info')
-    })
-
     it('should render UserConfig when content is userConfig', () => {
       wrapper = createWrapper({ content: 'userConfig', organizationId: '' })
       expect(wrapper.html()).toContain('User Config')
