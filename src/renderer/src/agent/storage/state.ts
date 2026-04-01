@@ -7,7 +7,6 @@ import {
   type ModelInfo,
   type AutoApprovalSettings,
   type ChatSettings,
-  type TelemetrySetting,
   type UserInfo,
   type Rule
 } from './shared'
@@ -162,7 +161,6 @@ export async function getAllExtensionState() {
     previousModeAwsBedrockCustomModelBaseId,
     //qwenApiLine,
     liteLlmApiKey,
-    telemetrySetting,
     //asksageApiKey,
     //asksageApiUrl,
     //xaiApiKey,
@@ -250,7 +248,6 @@ export async function getAllExtensionState() {
     getGlobalState('previousModeAwsBedrockCustomModelBaseId') as Promise<BedrockModelId | undefined>,
     //getGlobalState('qwenApiLine') as Promise<string | undefined>,
     getSecret('liteLlmApiKey') as Promise<string | undefined>,
-    getGlobalState('telemetrySetting') as Promise<TelemetrySetting | undefined>,
     //getSecret('asksageApiKey') as Promise<string | undefined>,
     //getGlobalState('asksageApiUrl') as Promise<string | undefined>,
     //getSecret('xaiApiKey') as Promise<string | undefined>,
@@ -396,7 +393,6 @@ export async function getAllExtensionState() {
     previousModeAwsBedrockCustomSelected,
     previousModeAwsBedrockCustomModelBaseId,
     mcpMarketplaceEnabled,
-    telemetrySetting: telemetrySetting || 'unset',
     //planActSeparateModelsSetting,
     shellIntegrationTimeout: shellIntegrationTimeout || 4000
   }

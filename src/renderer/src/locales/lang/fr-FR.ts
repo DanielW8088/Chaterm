@@ -211,13 +211,6 @@ export default {
     defaultLayout: 'Disposition par défaut',
     defaultLayoutTerminal: 'Terminal',
     defaultLayoutAgents: 'Agents',
-    telemetry: 'Télémétrie',
-    telemetryEnabled: 'Activé',
-    telemetryDisabled: 'Désactivé',
-    telemetryDescription:
-      "Aidez à améliorer Chaterm en envoyant des données d'utilisation anonymes et des rapports d'erreurs. Nous ne transmettons jamais de code, de contenu de prompt ou d'informations personnelles. Pour plus d'informations, veuillez consulter notre politique de confidentialité.",
-    telemetryDescriptionText:
-      "Aidez à améliorer Chaterm en envoyant des données d'utilisation anonymes et des rapports d'erreurs. Nous ne transmettons jamais de code, de contenu de prompt ou d'informations personnelles. Pour plus d'informations, veuillez consulter notre politique de confidentialité.",
     privacyPolicy: 'politique de confidentialité',
     enterprise: 'Entreprise',
     personal: 'Personnel',
@@ -424,8 +417,6 @@ export default {
     type: 'Type',
     loadConfigFailed: 'Échec du chargement de la configuration',
     loadConfigFailedDescription: 'La configuration par défaut sera utilisée',
-    telemetryUpdateFailed: 'Échec de la mise à jour des paramètres de télémétrie',
-    telemetryUpdateFailedDescription: 'Veuillez réessayer plus tard',
     error: 'Erreur',
     saveConfigFailedDescription: 'Échec de la sauvegarde de la configuration',
     themeSwitchFailed: 'Échec de la commutation du thème',
@@ -1541,5 +1532,31 @@ export default {
       selectClusterToEdit: 'Selectionnez un cluster pour afficher et modifier les details',
       k8sClusterConfig: 'Gestion des clusters'
     }
+  },
+  cloudStorage: {
+    title: 'Stockage Cloud',
+    tabTitle: 'Stockage Cloud',
+    description:
+      'Configurez Cloudflare R2 pour la synchronisation distante de la base de connaissances. Les fichiers sont stockés dans votre propre bucket R2.',
+    accountId: 'ID de compte',
+    accountIdPlaceholder: 'Votre ID de compte Cloudflare',
+    bucketName: 'Nom du bucket',
+    bucketNamePlaceholder: 'Nom du bucket R2',
+    accessKeyId: "ID de clé d'accès",
+    accessKeyIdPlaceholder: "ID de clé d'accès R2",
+    secretAccessKey: "Clé d'accès secrète",
+    secretAccessKeyPlaceholder: "Clé d'accès secrète R2",
+    customDomain: 'Domaine personnalisé',
+    customDomainPlaceholder: 'https://your-custom-domain.example.com',
+    customDomainHint: 'Laisser vide pour utiliser le point de terminaison R2 par défaut',
+    save: 'Enregistrer',
+    test: 'Tester la connexion',
+    clear: 'Effacer la configuration',
+    saved: 'Configuration enregistrée',
+    saveFailed: "Échec de l'enregistrement de la configuration",
+    cleared: 'Configuration effacée',
+    clearFailed: "Échec de l'effacement de la configuration",
+    testSuccess: 'Connexion réussie',
+    testFailed: 'Connexion échouée'
   }
 }

@@ -921,18 +921,6 @@ const api = {
       return Promise.reject(error)
     }
   },
-  // Telemetry events
-  captureButtonClick: async (button: string, properties?: Record<string, unknown>) => {
-    try {
-      const result = await ipcRenderer.invoke('capture-telemetry-event', {
-        eventType: 'button_click',
-        data: { button, properties }
-      })
-      return result
-    } catch (error) {
-      return Promise.reject(error)
-    }
-  },
   checkUpdate: () => ipcRenderer.invoke('update:checkUpdate'),
   download: () => ipcRenderer.invoke('update:download'),
   showOpenDialog: (options) => ipcRenderer.invoke('dialog:openFile', options),
@@ -1024,6 +1012,12 @@ const api = {
   kbSyncLastTime: () => ipcRenderer.invoke('kb:sync-last-time'),
   kbSyncLastResults: () => ipcRenderer.invoke('kb:sync-last-results'),
   getKbCloudStorage: () => ipcRenderer.invoke('kb:get-cloud-storage'),
+  r2ConfigGet: () => ipcRenderer.invoke('r2:config-get'),
+  r2ConfigSet: (cfg: { accountId: string; accessKeyId: string; secretAccessKey: string; bucketName: string; customDomain?: string }) =>
+    ipcRenderer.invoke('r2:config-set', cfg),
+  r2ConfigClear: () => ipcRenderer.invoke('r2:config-clear'),
+  r2ConfigTest: (cfg: { accountId: string; accessKeyId: string; secretAccessKey: string; bucketName: string; customDomain?: string }) =>
+    ipcRenderer.invoke('r2:config-test', cfg),
 
   agentEnableAndConfigure: (opts: { enabled: boolean }) => ipcRenderer.invoke('ssh:agent:enable-and-configure', opts),
   addKey: (opts: { keyData: string; passphrase?: string; comment?: string }) => ipcRenderer.invoke('ssh:agent:add-key', opts),

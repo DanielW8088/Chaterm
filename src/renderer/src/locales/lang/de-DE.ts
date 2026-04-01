@@ -211,13 +211,6 @@ export default {
     defaultLayout: 'Standard-Layout',
     defaultLayoutTerminal: 'Terminal',
     defaultLayoutAgents: 'Agents',
-    telemetry: 'Telemetry',
-    telemetryEnabled: 'Aktiviert',
-    telemetryDisabled: 'Deaktiviert',
-    telemetryDescription:
-      'Hilft Chaterm durch anonyme Nutzungsdaten und Fehlerberichte zu verbessern. Wir senden nie Code, Prompt-Inhalte oder persönliche Informationen. Weitere Informationen finden Sie in unserer Datenschutzrichtlinie.',
-    telemetryDescriptionText:
-      'Hilft Chaterm durch anonyme Nutzungsdaten und Fehlerberichte zu verbessern. Wir senden nie Code, Prompt-Inhalte oder persönliche Informationen. Weitere Informationen finden Sie in unserer',
     privacyPolicy: 'Datenschutzrichtlinie',
     enterprise: 'Unternehmen',
     personal: 'Personal',
@@ -424,8 +417,6 @@ export default {
     type: 'Typ',
     loadConfigFailed: 'Konfiguration laden fehlgeschlagen',
     loadConfigFailedDescription: 'Standardkonfiguration wird verwendet',
-    telemetryUpdateFailed: 'Telemetrie-Einstellungen aktualisieren fehlgeschlagen',
-    telemetryUpdateFailedDescription: 'Bitte versuchen Sie es später erneut',
     error: 'Fehler',
     saveConfigFailedDescription: 'Konfiguration speichern fehlgeschlagen',
     themeSwitchFailed: 'Theme wechseln fehlgeschlagen',
@@ -1524,5 +1515,31 @@ export default {
       selectClusterToEdit: 'Cluster auswaehlen, um Details anzuzeigen und zu bearbeiten',
       k8sClusterConfig: 'Cluster-Verwaltung'
     }
+  },
+  cloudStorage: {
+    title: 'Cloud-Speicher',
+    tabTitle: 'Cloud-Speicher',
+    description:
+      'Cloudflare R2 für die Remote-Synchronisierung der Wissensdatenbank konfigurieren. Dateien werden in Ihrem eigenen R2-Bucket gespeichert.',
+    accountId: 'Konto-ID',
+    accountIdPlaceholder: 'Ihre Cloudflare-Konto-ID',
+    bucketName: 'Bucket-Name',
+    bucketNamePlaceholder: 'R2-Bucket-Name',
+    accessKeyId: 'Zugriffsschlüssel-ID',
+    accessKeyIdPlaceholder: 'R2-Zugriffsschlüssel-ID',
+    secretAccessKey: 'Geheimer Zugriffsschlüssel',
+    secretAccessKeyPlaceholder: 'R2-Geheimer Zugriffsschlüssel',
+    customDomain: 'Benutzerdefinierte Domain',
+    customDomainPlaceholder: 'https://your-custom-domain.example.com',
+    customDomainHint: 'Leer lassen, um den Standard-R2-Endpunkt zu verwenden',
+    save: 'Speichern',
+    test: 'Verbindung testen',
+    clear: 'Konfiguration löschen',
+    saved: 'Konfiguration gespeichert',
+    saveFailed: 'Konfiguration konnte nicht gespeichert werden',
+    cleared: 'Konfiguration gelöscht',
+    clearFailed: 'Konfiguration konnte nicht gelöscht werden',
+    testSuccess: 'Verbindung erfolgreich',
+    testFailed: 'Verbindung fehlgeschlagen'
   }
 }

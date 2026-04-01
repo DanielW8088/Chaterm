@@ -290,8 +290,6 @@ export const bedrockModels = {
   }
 } as const satisfies Record<string, ModelInfo>
 
-export type TelemetrySetting = 'unset' | 'enabled' | 'disabled'
-
 export interface UserInfo {
   displayName: string | null
   email: string | null

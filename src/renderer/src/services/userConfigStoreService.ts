@@ -53,7 +53,6 @@ export interface UserConfig {
   watermark: 'open' | 'close' | undefined
   secretRedaction: 'enabled' | 'disabled' | undefined
   dataSync: 'enabled' | 'disabled' | undefined
-  telemetry?: string
   theme: 'dark' | 'light' | 'auto' | undefined
   defaultLayout?: 'terminal' | 'agents'
   feature?: number

@@ -211,13 +211,6 @@ export default {
     defaultLayout: 'Layout predefinito',
     defaultLayoutTerminal: 'Terminale',
     defaultLayoutAgents: 'Agenti',
-    telemetry: 'Telemetria',
-    telemetryEnabled: 'Abilitato',
-    telemetryDisabled: 'Disabilitato',
-    telemetryDescription:
-      'Aiuta a migliorare Chaterm inviando dati di utilizzo anonimi e report di errori. Non inviamo mai codice, contenuto prompt o informazioni personali. Per maggiori informazioni, consulta la nostra politica sulla privacy.',
-    telemetryDescriptionText:
-      'Aiuta a migliorare Chaterm inviando dati di utilizzo anonimi e report di errori. Non inviamo mai codice, contenuto prompt o informazioni personali. Per maggiori informazioni, consulta la nostra',
     privacyPolicy: 'politica sulla privacy',
     enterprise: 'Aziendale',
     personal: 'Personale',
@@ -424,8 +417,6 @@ export default {
     type: 'Tipo',
     loadConfigFailed: 'Caricamento configurazione fallito',
     loadConfigFailedDescription: 'Configurazione predefinita verrà utilizzata',
-    telemetryUpdateFailed: 'Aggiornamento telemetria fallito',
-    telemetryUpdateFailedDescription: 'Per favore, riprova più tardi',
     error: 'Errore',
     saveConfigFailedDescription: 'Salvataggio configurazione fallito',
     themeSwitchFailed: 'Switch tema fallito',
@@ -1539,5 +1530,30 @@ export default {
       selectClusterToEdit: 'Seleziona un cluster per visualizzare e modificare i dettagli',
       k8sClusterConfig: 'Gestione cluster'
     }
+  },
+  cloudStorage: {
+    title: 'Archiviazione Cloud',
+    tabTitle: 'Archiviazione Cloud',
+    description: 'Configura Cloudflare R2 per la sincronizzazione remota della base di conoscenza. I file vengono archiviati nel tuo bucket R2.',
+    accountId: 'ID Account',
+    accountIdPlaceholder: 'Il tuo ID account Cloudflare',
+    bucketName: 'Nome Bucket',
+    bucketNamePlaceholder: 'Nome bucket R2',
+    accessKeyId: 'ID Chiave di Accesso',
+    accessKeyIdPlaceholder: 'ID chiave di accesso R2',
+    secretAccessKey: 'Chiave di Accesso Segreta',
+    secretAccessKeyPlaceholder: 'Chiave di accesso segreta R2',
+    customDomain: 'Dominio Personalizzato',
+    customDomainPlaceholder: 'https://your-custom-domain.example.com',
+    customDomainHint: "Lascia vuoto per utilizzare l'endpoint R2 predefinito",
+    save: 'Salva',
+    test: 'Testa Connessione',
+    clear: 'Cancella Configurazione',
+    saved: 'Configurazione salvata',
+    saveFailed: 'Salvataggio configurazione non riuscito',
+    cleared: 'Configurazione cancellata',
+    clearFailed: 'Cancellazione configurazione non riuscita',
+    testSuccess: 'Connessione riuscita',
+    testFailed: 'Connessione non riuscita'
   }
 }

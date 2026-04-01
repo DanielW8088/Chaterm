@@ -11,7 +11,6 @@ import path from 'path'
 import { createReadStream } from 'fs'
 import * as fs from 'fs/promises'
 import * as readline from 'node:readline/promises'
-import { telemetryService } from '@services/telemetry/TelemetryService'
 import { mark } from '@perf'
 import pWaitFor from 'p-wait-for'
 import { serializeError } from 'serialize-error'
@@ -569,15 +568,6 @@ export class Task {
     } else {
       // taskId-only = resume, same as the old historyItem path
       this.resumeTaskFromHistory()
-    }
-
-    // initialize telemetry
-    if (task) {
-      // New task started
-      telemetryService.captureTaskCreated(this.taskId, apiConfiguration.apiProvider)
-    } else {
-      // Open task from history
-      telemetryService.captureTaskRestarted(this.taskId, apiConfiguration.apiProvider)
     }
   }
 
@@ -2264,14 +2254,6 @@ export class Task {
       role: 'user',
       content: userContent
     })
-    const chatSettings = await getGlobalState('chatSettings')
-    telemetryService.captureApiRequestEvent(
-      this.taskId,
-      this.apiProviderId ?? (await getGlobalState('apiProvider')),
-      this.api.getModel().id,
-      'user',
-      chatSettings?.mode
-    )
     // Update API request message
     await this.updateApiRequestMessage(userContent)
   }
@@ -3160,9 +3142,6 @@ export class Task {
           message: question.replace(/\n/g, ' ')
         })
       }
-      // Store the number of options for telemetry
-      const options = parsePartialArrayString(optionsRaw || '[]')
-
       const { text, contentParts } = await this.ask('followup', JSON.stringify(sharedMessage), false)
 
       if (optionsRaw && text && parsePartialArrayString(optionsRaw).includes(text)) {
@@ -3173,10 +3152,8 @@ export class Task {
             selected: text
           } as ChatermAskQuestion)
           await this.saveChatermMessagesAndUpdateHistory()
-          telemetryService.captureOptionSelected(this.taskId, options.length, 'act')
         }
       } else {
-        telemetryService.captureOptionsIgnored(this.taskId, options.length, 'act')
         await this.saveUserMessage(text ?? '', contentParts)
       }
 
@@ -3239,7 +3216,6 @@ export class Task {
           await this.say('completion_result', result, false)
           await this.saveCheckpoint(true)
           await addNewChangesFlagToLastCompletionResultMessage()
-          telemetryService.captureTaskCompleted(this.taskId)
         } else {
           await this.saveCheckpoint(true)
         }
@@ -3255,7 +3231,6 @@ export class Task {
         await this.say('completion_result', result, false)
         await this.saveCheckpoint(true)
         await addNewChangesFlagToLastCompletionResultMessage()
-        telemetryService.captureTaskCompleted(this.taskId)
       }
 
       // Auto-complete all in_progress todos when task is completed (intranet feature)

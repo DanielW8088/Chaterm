@@ -5,7 +5,6 @@
 // Licensed under the Apache License, Version 2.0
 
 import { ApiConfiguration } from './api'
-import { TelemetrySetting } from './TelemetrySetting'
 import { z } from 'zod'
 
 export type Host = { host: string; uuid: string; connection: string; organizationUuid?: string; assetType?: string }
@@ -57,7 +56,6 @@ export type WebviewMessageType =
   | 'apiConfiguration'
   | 'newTask'
   | 'condense'
-  | 'telemetrySetting'
   | 'askResponse'
   | 'deleteTaskWithId'
   | 'showTaskWithId'
@@ -70,7 +68,6 @@ export interface WebviewMessage {
   type: WebviewMessageType
   text?: string
   apiConfiguration?: ApiConfiguration
-  telemetrySetting?: TelemetrySetting
   askResponse?: ChatermAskResponse
   hosts?: Host[]
   feedbackType?: TaskFeedbackType

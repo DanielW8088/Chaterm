@@ -211,13 +211,6 @@ export default {
     defaultLayout: '默認佈局',
     defaultLayoutTerminal: 'Terminal',
     defaultLayoutAgents: 'Agents',
-    telemetry: '遙測',
-    telemetryEnabled: '開啟',
-    telemetryDisabled: '關閉',
-    telemetryDescription:
-      '通過發送匿名使用數據和錯誤報告幫助改進 Chaterm。我們絕不會發送任何代碼、提示內容或個人信息。如需了解詳細信息，請查看我們的隱私政策。',
-    telemetryDescriptionText:
-      '通過發送匿名使用數據和錯誤報告幫助改進 Chaterm。我們絕不會發送任何代碼、提示內容或個人信息。如需了解詳細信息，請查看我們的',
     privacyPolicy: '隱私政策',
     enterprise: '企業用戶',
     personal: '個人用戶',
@@ -416,8 +409,6 @@ export default {
     type: '類型',
     loadConfigFailed: '載入配置失敗',
     loadConfigFailedDescription: '將使用默認配置',
-    telemetryUpdateFailed: '遙測設置更新失敗',
-    telemetryUpdateFailedDescription: '請稍後重試',
     error: '錯誤',
     saveConfigFailedDescription: '保存配置失敗',
     themeSwitchFailed: '主題切換失敗',
@@ -1504,5 +1495,30 @@ export default {
       selectClusterToEdit: '選擇一個叢集以檢視和編輯詳情',
       k8sClusterConfig: '叢集管理'
     }
+  },
+  cloudStorage: {
+    title: '雲端儲存',
+    tabTitle: '雲端儲存',
+    description: '設定 Cloudflare R2 以進行知識庫遠端同步。檔案儲存在您自己的 R2 儲存桶中。',
+    accountId: '帳戶 ID',
+    accountIdPlaceholder: '您的 Cloudflare 帳戶 ID',
+    bucketName: '儲存桶名稱',
+    bucketNamePlaceholder: 'R2 儲存桶名稱',
+    accessKeyId: '存取金鑰 ID',
+    accessKeyIdPlaceholder: 'R2 存取金鑰 ID',
+    secretAccessKey: '存取金鑰',
+    secretAccessKeyPlaceholder: 'R2 存取金鑰',
+    customDomain: '自訂網域',
+    customDomainPlaceholder: 'https://your-custom-domain.example.com',
+    customDomainHint: '留空則使用預設 R2 端點',
+    save: '儲存',
+    test: '測試連線',
+    clear: '清除設定',
+    saved: '設定已儲存',
+    saveFailed: '儲存設定失敗',
+    cleared: '設定已清除',
+    clearFailed: '清除設定失敗',
+    testSuccess: '連線成功',
+    testFailed: '連線失敗'
   }
 }

@@ -199,13 +199,6 @@ export default {
     defaultLayout: 'التخطيط الافتراضي',
     defaultLayoutTerminal: 'التبويب',
     defaultLayoutAgents: 'الأصول',
-    telemetry: 'التليمتري',
-    telemetryEnabled: 'مفعل',
-    telemetryDisabled: 'معطل',
-    telemetryDescription:
-      'ساعد Chaterm بتحسينه عن طريق إرسال بيانات الاستخدام المجهولة وتقارير الأخطاء. نحن لا نرسل أي كود، محتوى الطلب، أو معلومات شخصية. لمزيد من المعلومات، يرجى إعرض سياسة الخصوصية.',
-    telemetryDescriptionText:
-      'ساعد Chaterm بتحسينه عن طريق إرسال بيانات الاستخدام المجهولة وتقارير الأخطاء. نحن لا نرسل أي كود، محتوى الطلب، أو معلومات شخصية. لمزيد من المعلومات، يرجى إعرض سياسة الخصوصية.',
     privacyPolicy: 'سياسة الخصوصية',
     enterprise: 'المؤسسة',
     personal: 'الشخصي',
@@ -405,8 +398,6 @@ export default {
     type: 'النوع',
     loadConfigFailed: 'فشل تحميل الإعدادات',
     loadConfigFailedDescription: 'سيتم استخدام الإعدادات الافتراضية',
-    telemetryUpdateFailed: 'فشل تحديث إعدادات التلكوميتر',
-    telemetryUpdateFailedDescription: 'الرجاء المحاولة مرة أخرى لاحقا',
     error: 'خطأ',
     saveConfigFailedDescription: 'فشل حفظ الإعدادات',
     themeSwitchFailed: 'فشل تبديل السمة',
@@ -1495,5 +1486,30 @@ export default {
       selectClusterToEdit: 'حدد مجموعة لعرض التفاصيل وتعديلها',
       k8sClusterConfig: 'إدارة المجموعات'
     }
+  },
+  cloudStorage: {
+    title: 'التخزين السحابي',
+    tabTitle: 'التخزين السحابي',
+    description: 'قم بتكوين Cloudflare R2 لمزامنة قاعدة المعرفة عن بُعد. يتم تخزين الملفات في حاوية R2 الخاصة بك.',
+    accountId: 'معرف الحساب',
+    accountIdPlaceholder: 'معرف حساب Cloudflare الخاص بك',
+    bucketName: 'اسم الحاوية',
+    bucketNamePlaceholder: 'اسم حاوية R2',
+    accessKeyId: 'معرف مفتاح الوصول',
+    accessKeyIdPlaceholder: 'معرف مفتاح وصول R2',
+    secretAccessKey: 'مفتاح الوصول السري',
+    secretAccessKeyPlaceholder: 'مفتاح وصول R2 السري',
+    customDomain: 'النطاق المخصص',
+    customDomainPlaceholder: 'https://your-custom-domain.example.com',
+    customDomainHint: 'اتركه فارغاً لاستخدام نقطة نهاية R2 الافتراضية',
+    save: 'حفظ',
+    test: 'اختبار الاتصال',
+    clear: 'مسح الإعدادات',
+    saved: 'تم حفظ الإعدادات',
+    saveFailed: 'فشل حفظ الإعدادات',
+    cleared: 'تم مسح الإعدادات',
+    clearFailed: 'فشل مسح الإعدادات',
+    testSuccess: 'الاتصال ناجح',
+    testFailed: 'فشل الاتصال'
   }
 }

@@ -211,13 +211,6 @@ export default {
     defaultLayout: '기본 레이아웃',
     defaultLayoutTerminal: '터미널',
     defaultLayoutAgents: '에이전트',
-    telemetry: '텔레메트리',
-    telemetryEnabled: '활성화',
-    telemetryDisabled: '비활성화',
-    telemetryDescription:
-      '익명의 사용 데이터와 오류 보고서를 전송하여 Chaterm을 개선하는 데 도움을 줍니다. 코드, 프롬프트 내용, 개인 정보는 전송하지 않습니다. 자세한 내용은 개인 정보 보호 정책을 참조하세요.',
-    telemetryDescriptionText:
-      '익명의 사용 데이터와 오류 보고서를 전송하여 Chaterm을 개선하는 데 도움을 줍니다. 코드, 프롬프트 내용, 개인 정보는 전송하지 않습니다. 자세한 내용은 개인 정보 보호 정책을 참조하세요.',
     privacyPolicy: '개인 정보 보호 정책',
     enterprise: '기업',
     personal: '개인',
@@ -416,8 +409,6 @@ export default {
     type: '유형',
     loadConfigFailed: '설정 로드 실패',
     loadConfigFailedDescription: '기본 설정이 사용됩니다',
-    telemetryUpdateFailed: '텔레메트리 설정 업데이트 실패',
-    telemetryUpdateFailedDescription: '다시 시도해주세요',
     error: '오류',
     saveConfigFailedDescription: '설정 저장 실패',
     themeSwitchFailed: '테마 전환 실패',
@@ -1508,5 +1499,30 @@ export default {
       selectClusterToEdit: '클러스터를 선택하여 세부 정보 보기 및 편집',
       k8sClusterConfig: '클러스터 관리'
     }
+  },
+  cloudStorage: {
+    title: '클라우드 스토리지',
+    tabTitle: '클라우드 스토리지',
+    description: '지식 베이스 원격 동기화를 위해 Cloudflare R2를 구성합니다. 파일은 자신의 R2 버킷에 저장됩니다.',
+    accountId: '계정 ID',
+    accountIdPlaceholder: 'Cloudflare 계정 ID',
+    bucketName: '버킷 이름',
+    bucketNamePlaceholder: 'R2 버킷 이름',
+    accessKeyId: '액세스 키 ID',
+    accessKeyIdPlaceholder: 'R2 액세스 키 ID',
+    secretAccessKey: '시크릿 액세스 키',
+    secretAccessKeyPlaceholder: 'R2 시크릿 액세스 키',
+    customDomain: '사용자 정의 도메인',
+    customDomainPlaceholder: 'https://your-custom-domain.example.com',
+    customDomainHint: '비워두면 기본 R2 엔드포인트를 사용합니다',
+    save: '저장',
+    test: '연결 테스트',
+    clear: '구성 지우기',
+    saved: '구성이 저장되었습니다',
+    saveFailed: '구성 저장에 실패했습니다',
+    cleared: '구성이 지워졌습니다',
+    clearFailed: '구성 지우기에 실패했습니다',
+    testSuccess: '연결 성공',
+    testFailed: '연결 실패'
   }
 }

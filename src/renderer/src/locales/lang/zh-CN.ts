@@ -209,13 +209,6 @@ export default {
     defaultLayout: '默认布局',
     defaultLayoutTerminal: 'Terminal',
     defaultLayoutAgents: 'Agents',
-    telemetry: '遥测',
-    telemetryEnabled: '开启',
-    telemetryDisabled: '关闭',
-    telemetryDescription:
-      '通过发送匿名使用数据和错误报告帮助改进 Chaterm。我们绝不会发送任何代码、提示内容或个人信息。如需了解详细信息，请查看我们的隐私政策。',
-    telemetryDescriptionText:
-      '通过发送匿名使用数据和错误报告帮助改进 Chaterm。我们绝不会发送任何代码、提示内容或个人信息。如需了解详细信息，请查看我们的',
     privacyPolicy: '隐私政策',
     enterprise: '企业用户',
     personal: '个人用户',
@@ -414,8 +407,6 @@ export default {
     type: '类型',
     loadConfigFailed: '加载配置失败',
     loadConfigFailedDescription: '将使用默认配置',
-    telemetryUpdateFailed: '遥测设置更新失败',
-    telemetryUpdateFailedDescription: '请稍后重试',
     error: '错误',
     saveConfigFailedDescription: '保存配置失败',
     themeSwitchFailed: '主题切换失败',
@@ -1504,5 +1495,30 @@ export default {
       selectClusterToEdit: '选择一个集群以查看和编辑详情',
       k8sClusterConfig: '集群管理'
     }
+  },
+  cloudStorage: {
+    title: '云存储',
+    tabTitle: '云存储',
+    description: '配置 Cloudflare R2 用于知识库远程同步。文件存储在您自己的 R2 存储桶中。',
+    accountId: '账户 ID',
+    accountIdPlaceholder: '您的 Cloudflare 账户 ID',
+    bucketName: '存储桶名称',
+    bucketNamePlaceholder: 'R2 存储桶名称',
+    accessKeyId: '访问密钥 ID',
+    accessKeyIdPlaceholder: 'R2 访问密钥 ID',
+    secretAccessKey: '访问密钥',
+    secretAccessKeyPlaceholder: 'R2 访问密钥',
+    customDomain: '自定义域名',
+    customDomainPlaceholder: 'https://your-custom-domain.example.com',
+    customDomainHint: '留空则使用默认 R2 端点',
+    save: '保存',
+    test: '测试连接',
+    clear: '清除配置',
+    saved: '配置已保存',
+    saveFailed: '保存配置失败',
+    cleared: '配置已清除',
+    clearFailed: '清除配置失败',
+    testSuccess: '连接成功',
+    testFailed: '连接失败'
   }
 }

@@ -29,7 +29,6 @@ export type GlobalStateKey =
   | 'previousModeReasoningEffort'
   | 'previousModeAwsBedrockCustomSelected'
   | 'previousModeAwsBedrockCustomModelBaseId'
-  | 'telemetrySetting'
   | 'thinkingBudgetTokens'
   | 'reasoningEffort'
   | 'favoritedModelIds'

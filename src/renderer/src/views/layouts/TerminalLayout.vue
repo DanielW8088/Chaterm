@@ -805,7 +805,6 @@ onMounted(async () => {
     currentTheme.value = getActualTheme(config.theme || 'dark')
     hideTabCloseButton.value = config.showCloseButton === 2
 
-    // Delay of 2 seconds to wait for the main thread to complete initializeTelemetrySetting
     setTimeout(async () => {
       const extensionStates = [
         { name: ExtensionNames.AUTO_COMPLETE, enabled: config.autoCompleteStatus === 1 },

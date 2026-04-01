@@ -211,13 +211,6 @@ export default {
     defaultLayout: 'Default Layout',
     defaultLayoutTerminal: 'Terminal',
     defaultLayoutAgents: 'Agents',
-    telemetry: 'Telemetry',
-    telemetryEnabled: 'Enabled',
-    telemetryDisabled: 'Disabled',
-    telemetryDescription:
-      'Help improve Chaterm by sending anonymous usage data and error reports. We never send any code, prompt content, or personal information. For more information, please see our privacy policy.',
-    telemetryDescriptionText:
-      'Help improve Chaterm by sending anonymous usage data and error reports. We never send any code, prompt content, or personal information. For more information, please see our',
     privacyPolicy: 'privacy policy',
     enterprise: 'Enterprise',
     personal: 'Personal',
@@ -420,8 +413,6 @@ export default {
     type: 'Type',
     loadConfigFailed: 'Failed to load configuration',
     loadConfigFailedDescription: 'Default configuration will be used',
-    telemetryUpdateFailed: 'Failed to update telemetry settings',
-    telemetryUpdateFailedDescription: 'Please try again later',
     error: 'Error',
     saveConfigFailedDescription: 'Failed to save configuration',
     themeSwitchFailed: 'Failed to switch theme',
@@ -1519,5 +1510,30 @@ export default {
       selectClusterToEdit: 'Select a cluster to view and edit details',
       k8sClusterConfig: 'Cluster Management'
     }
+  },
+  cloudStorage: {
+    title: 'Cloud Storage',
+    tabTitle: 'Cloud Storage',
+    description: 'Configure Cloudflare R2 for remote knowledge base sync. Files are stored in your own R2 bucket.',
+    accountId: 'Account ID',
+    accountIdPlaceholder: 'Your Cloudflare Account ID',
+    bucketName: 'Bucket Name',
+    bucketNamePlaceholder: 'R2 bucket name',
+    accessKeyId: 'Access Key ID',
+    accessKeyIdPlaceholder: 'R2 Access Key ID',
+    secretAccessKey: 'Secret Access Key',
+    secretAccessKeyPlaceholder: 'R2 Secret Access Key',
+    customDomain: 'Custom Domain',
+    customDomainPlaceholder: 'https://your-custom-domain.example.com',
+    customDomainHint: 'Leave empty to use the default R2 endpoint',
+    save: 'Save',
+    test: 'Test Connection',
+    clear: 'Clear Configuration',
+    saved: 'Configuration saved',
+    saveFailed: 'Failed to save configuration',
+    cleared: 'Configuration cleared',
+    clearFailed: 'Failed to clear configuration',
+    testSuccess: 'Connection successful',
+    testFailed: 'Connection failed'
   }
 }

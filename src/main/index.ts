@@ -48,7 +48,6 @@ import { getTaskMetadata, saveTaskTitle, saveTaskFavorite, getTaskList } from '.
 import { createMainWindow, type WindowCreationResult } from './windowManager'
 import { registerUpdater } from './updater'
 import { setupPluginIpc } from './plugin/pluginIpc'
-import { telemetryService, checkIsFirstLaunch } from './agent/services/telemetry/TelemetryService'
 import { versionPromptService } from './version/versionPromptService'
 
 import * as fsSync from 'fs'
@@ -67,7 +66,6 @@ import { getPluginDetailsByName, getLocalizedStrings, getUserLanguage } from './
 import { capabilityRegistry } from './ssh/capabilityRegistry'
 import { getActualTheme, loadUserTheme } from './themeManager'
 import { getEdition, getProtocolPrefix, getProtocolName } from './config/edition'
-import { TelemetrySetting } from '@shared/TelemetrySetting'
 import { registerKnowledgeBaseHandlers, initKbSearchManager, closeKbSearchManager } from './services/knowledgebase'
 import { registerStageChatAttachmentHandlers } from './services/agent/stageChatAttachment'
 import { startKbSync, stopKbSync } from './services/knowledgebase/sync'
@@ -403,28 +401,6 @@ app.whenReady().then(async () => {
   if (ffmpegVerification) await ffmpegVerification
   await migrationPromise
 
-  // Function to initialize telemetry setting
-  const initializeTelemetrySetting = async () => {
-    let telemetrySetting: TelemetrySetting
-    try {
-      telemetrySetting = (await getGlobalState('telemetrySetting')) || 'enabled'
-    } catch (error) {
-      telemetrySetting = 'enabled'
-    }
-
-    if (controller) {
-      await controller.updateTelemetrySetting(telemetrySetting)
-    }
-
-    const isFirstLaunch = checkIsFirstLaunch()
-
-    if (isFirstLaunch) {
-      telemetryService.captureAppFirstLaunch()
-    }
-
-    telemetryService.captureAppStarted()
-  }
-
   // Call the test function (imported from ./agent/core/storage/state.ts)
   if (mainWindow && mainWindow.webContents) {
     if (mainWindow.webContents.isLoading()) {
@@ -449,8 +425,6 @@ app.whenReady().then(async () => {
       shell.openExternal(url)
     }
   })
-
-  setTimeout(initializeTelemetrySetting, 1000)
 
   mark('chaterm/main/ready')
 
@@ -2749,24 +2723,6 @@ ipcMain.handle('get-assets-in-folder', async (_, data) => {
   } catch (error) {
     logger.error('Main process get-assets-in-folder error', { error: error })
     return { data: { message: 'failed', error: error instanceof Error ? error.message : String(error) } }
-  }
-})
-
-ipcMain.handle('capture-telemetry-event', async (_, { eventType, data }) => {
-  try {
-    switch (eventType) {
-      case 'button_click':
-        // taskId should be provided in data if needed, otherwise undefined
-        const taskId = data?.taskId
-        telemetryService.captureButtonClick(data.button, taskId, data.properties)
-        break
-      default:
-        logger.warn('Unknown telemetry event type', { value: eventType })
-    }
-    return { success: true }
-  } catch (error) {
-    logger.error('Failed to capture telemetry event', { error: error })
-    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
   }
 })
 

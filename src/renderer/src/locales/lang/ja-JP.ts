@@ -211,13 +211,6 @@ export default {
     defaultLayout: 'デフォルトレイアウト',
     defaultLayoutTerminal: 'ターミナル',
     defaultLayoutAgents: 'エージェント',
-    telemetry: 'テレメトリー',
-    telemetryEnabled: '有効',
-    telemetryDisabled: '無効',
-    telemetryDescription:
-      '匿名の使用データとエラーレポートを送信することで、Chatermの改善にご協力ください。コード、プロンプト内容、個人情報は一切送信しません。詳細については、プライバシーポリシーをご覧ください。',
-    telemetryDescriptionText:
-      '匿名の使用データとエラーレポートを送信することで、Chatermの改善にご協力ください。コード、プロンプト内容、個人情報は一切送信しません。詳細については、',
     privacyPolicy: 'プライバシーポリシー',
     enterprise: 'エンタープライズ',
     personal: '個人',
@@ -419,8 +412,6 @@ export default {
     type: 'タイプ',
     loadConfigFailed: '設定の読み込みに失敗しました',
     loadConfigFailedDescription: 'デフォルト設定が使用されます',
-    telemetryUpdateFailed: 'テレメトリー設定の更新に失敗しました',
-    telemetryUpdateFailedDescription: '後でもう一度お試しください',
     error: 'エラー',
     saveConfigFailedDescription: '設定の保存に失敗しました',
     themeSwitchFailed: 'テーマの切り替えに失敗しました',
@@ -1513,5 +1504,30 @@ export default {
       selectClusterToEdit: 'クラスターを選択して詳細を表示・編集',
       k8sClusterConfig: 'クラスター管理'
     }
+  },
+  cloudStorage: {
+    title: 'クラウドストレージ',
+    tabTitle: 'クラウドストレージ',
+    description: 'ナレッジベースのリモート同期に Cloudflare R2 を設定します。ファイルはお客様自身の R2 バケットに保存されます。',
+    accountId: 'アカウント ID',
+    accountIdPlaceholder: 'Cloudflare アカウント ID',
+    bucketName: 'バケット名',
+    bucketNamePlaceholder: 'R2 バケット名',
+    accessKeyId: 'アクセスキー ID',
+    accessKeyIdPlaceholder: 'R2 アクセスキー ID',
+    secretAccessKey: 'シークレットアクセスキー',
+    secretAccessKeyPlaceholder: 'R2 シークレットアクセスキー',
+    customDomain: 'カスタムドメイン',
+    customDomainPlaceholder: 'https://your-custom-domain.example.com',
+    customDomainHint: '空白のままにするとデフォルトの R2 エンドポイントを使用します',
+    save: '保存',
+    test: '接続テスト',
+    clear: '設定をクリア',
+    saved: '設定を保存しました',
+    saveFailed: '設定の保存に失敗しました',
+    cleared: '設定をクリアしました',
+    clearFailed: '設定のクリアに失敗しました',
+    testSuccess: '接続成功',
+    testFailed: '接続失敗'
   }
 }

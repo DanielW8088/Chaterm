@@ -211,13 +211,6 @@ export default {
     defaultLayout: 'По умолчанию',
     defaultLayoutTerminal: 'Терминал',
     defaultLayoutAgents: 'Агенты',
-    telemetry: 'Телеметрия',
-    telemetryEnabled: 'Включено',
-    telemetryDisabled: 'Выключено',
-    telemetryDescription:
-      'Помогите улучшить Chaterm, отправляя анонимные данные об использовании и отчеты об ошибках. Мы никогда не отправляем никакого кода, содержимого запроса или персональной информации. Для получения дополнительной информации, пожалуйста, ознакомьтесь с нашей политикой конфиденциальности.',
-    telemetryDescriptionText:
-      'Помогите улучшить Chaterm, отправляя анонимные данные об использовании и отчеты об ошибках. Мы никогда не отправляем никакого кода, содержимого запроса или персональной информации. Для получения дополнительной информации, пожалуйста, ознакомьтесь с нашей политикой конфиденциальности.',
     privacyPolicy: 'Политика конфиденциальности',
     enterprise: 'Корпорация',
     personal: 'Личное',
@@ -423,8 +416,6 @@ export default {
     type: 'Тип',
     loadConfigFailed: 'Не удалось загрузить конфигурацию',
     loadConfigFailedDescription: 'По умолчанию будет использоваться конфигурация',
-    telemetryUpdateFailed: 'Не удалось обновить настройки телеметрии',
-    telemetryUpdateFailedDescription: 'Пожалуйста, попробуйте снова позже',
     error: 'Ошибка',
     saveConfigFailedDescription: 'Не удалось сохранить конфигурацию',
     themeSwitchFailed: 'Не удалось переключить тему',
@@ -1534,5 +1525,30 @@ export default {
       selectClusterToEdit: 'Выберите кластер для просмотра и редактирования',
       k8sClusterConfig: 'Управление кластерами'
     }
+  },
+  cloudStorage: {
+    title: 'Облачное хранилище',
+    tabTitle: 'Облачное хранилище',
+    description: 'Настройте Cloudflare R2 для удалённой синхронизации базы знаний. Файлы хранятся в вашем собственном бакете R2.',
+    accountId: 'ID аккаунта',
+    accountIdPlaceholder: 'Ваш ID аккаунта Cloudflare',
+    bucketName: 'Имя бакета',
+    bucketNamePlaceholder: 'Имя бакета R2',
+    accessKeyId: 'ID ключа доступа',
+    accessKeyIdPlaceholder: 'ID ключа доступа R2',
+    secretAccessKey: 'Секретный ключ доступа',
+    secretAccessKeyPlaceholder: 'Секретный ключ доступа R2',
+    customDomain: 'Пользовательский домен',
+    customDomainPlaceholder: 'https://your-custom-domain.example.com',
+    customDomainHint: 'Оставьте пустым для использования стандартного эндпоинта R2',
+    save: 'Сохранить',
+    test: 'Проверить соединение',
+    clear: 'Очистить конфигурацию',
+    saved: 'Конфигурация сохранена',
+    saveFailed: 'Не удалось сохранить конфигурацию',
+    cleared: 'Конфигурация очищена',
+    clearFailed: 'Не удалось очистить конфигурацию',
+    testSuccess: 'Соединение успешно',
+    testFailed: 'Соединение не удалось'
   }
 }
