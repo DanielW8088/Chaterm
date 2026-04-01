@@ -56,7 +56,6 @@
           />
         </template>
         <template v-else>
-          <UserInfo v-if="localTab.content === 'userInfo'" />
           <UserConfig v-if="localTab.content === 'userConfig'" />
           <Files v-if="localTab.content === 'files'" />
           <KnowledgeCenterEditor
@@ -98,7 +97,6 @@
 import { computed, ref, ComponentPublicInstance, onMounted, watch, nextTick } from 'vue'
 import { userConfigStore } from '@/store/userConfigStore'
 import 'splitpanes/dist/splitpanes.css'
-import UserInfo from '@views/components/LeftTab/config/userInfo.vue'
 import UserConfig from '@views/components/LeftTab/config/userConfig.vue'
 import AssetConfig from '@views/components/LeftTab/config/assetConfig.vue'
 import AliasConfig from '@views/components/Extensions/aliasConfig.vue'

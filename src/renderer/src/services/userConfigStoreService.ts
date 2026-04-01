@@ -50,7 +50,6 @@ export interface UserConfig {
   terminalType?: string
   middleMouseEvent?: 'paste' | 'contextMenu' | 'none'
   rightMouseEvent?: 'paste' | 'contextMenu' | 'none'
-  watermark: 'open' | 'close' | undefined
   secretRedaction: 'enabled' | 'disabled' | undefined
   dataSync: 'enabled' | 'disabled' | undefined
   theme: 'dark' | 'light' | 'auto' | undefined
@@ -138,7 +137,6 @@ export function buildDefaultUserConfig(now: number = Date.now()): UserConfig {
     cursorStyle: 'block',
     middleMouseEvent: 'paste',
     rightMouseEvent: 'contextMenu',
-    watermark: 'open',
     secretRedaction: 'disabled',
     dataSync: 'disabled',
     theme: 'auto',
@@ -294,8 +292,7 @@ export class UserConfigStoreService {
       logger.info('Config saved successfully to SQLite', {
         theme: sanitizedConfig.theme,
         language: sanitizedConfig.language,
-        defaultLayout: sanitizedConfig.defaultLayout,
-        watermark: sanitizedConfig.watermark
+        defaultLayout: sanitizedConfig.defaultLayout
       })
 
       // Trigger sync upload after successful save
@@ -328,7 +325,6 @@ export const SYNC_WHITELIST = [
   'language',
   'theme',
   'defaultLayout',
-  'watermark',
   'secretRedaction',
   'fontSize',
   'scrollBack',
@@ -363,7 +359,6 @@ export const SYNC_FIELD_VALIDATORS: Record<SyncWhitelistKey, (val: unknown) => b
   language: (val) => typeof val === 'string' && SUPPORTED_LANGUAGE_VALUES.includes(val as SupportedLanguage),
   theme: (val) => typeof val === 'string' && ['dark', 'light', 'auto'].includes(val),
   defaultLayout: (val) => typeof val === 'string' && ['terminal', 'agents'].includes(val),
-  watermark: (val) => typeof val === 'string' && ['open', 'close'].includes(val),
   secretRedaction: (val) => typeof val === 'string' && ['enabled', 'disabled'].includes(val),
   fontSize: (val) => typeof val === 'number' && Number.isInteger(val) && val >= 8 && val <= 64,
   scrollBack: (val) => typeof val === 'number' && Number.isInteger(val) && val >= 1 && val <= 100000,
@@ -534,11 +529,6 @@ export function dispatchSideEffects(changedFields: Partial<SyncableUserConfig>):
   // defaultLayout -> eventBus notification
   if ('defaultLayout' in changedFields && changedFields.defaultLayout) {
     eventBus.emit('defaultLayoutChanged', changedFields.defaultLayout)
-  }
-
-  // watermark -> eventBus notification
-  if ('watermark' in changedFields && changedFields.watermark) {
-    eventBus.emit('updateWatermark', changedFields.watermark)
   }
 
   // pinchZoomStatus -> eventBus notification

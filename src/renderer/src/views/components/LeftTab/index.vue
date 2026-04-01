@@ -141,11 +141,6 @@
       v-if="showUserMenu"
       class="user-menu"
     >
-      <div
-        class="menu-item"
-        @click="userInfo"
-        >{{ $t('common.userInfo') }}</div
-      >
     </div>
   </div>
 </template>
@@ -225,11 +220,6 @@ const openAiRight = () => {
     beforeActive
   })
 }
-const userInfo = () => {
-  emit('open-user-tab', 'userInfo')
-  showUserMenu.value = false
-}
-
 const userConfig = () => {
   emit('open-user-tab', 'userConfig')
   showUserMenu.value = false

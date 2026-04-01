@@ -14,7 +14,6 @@ export const userConfigStore = defineStore('userConfig', {
         fontSize: 12,
         highlightStatus: 1,
         scrollBack: 1000,
-        watermark: 'open',
         secretRedaction: 'disabled',
         dataSync: 'disabled',
         feature: 0.0,
@@ -43,7 +42,6 @@ export const userConfigStore = defineStore('userConfig', {
       fontSize: number
       highlightStatus: number
       scrollBack: number
-      watermark: string
       secretRedaction: string
       dataSync: string
       feature: number

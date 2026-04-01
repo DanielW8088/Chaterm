@@ -1,14 +1,14 @@
-import { getUserInfo } from '@/utils/permission'
+import { userInfoStore } from '@/store/index'
 
 const logger = createRendererLogger('agent.storage')
 
 // Get current user ID
 export function getCurrentUserId(): number {
-  const userInfo = getUserInfo()
-  if (!userInfo || !userInfo.uid) {
+  const { uid } = userInfoStore().userInfo
+  if (!uid) {
     throw new Error('User not logged in. Please login first to use storage.')
   }
-  return userInfo.uid
+  return uid
 }
 
 // Set current user ID (for compatibility, not used in SQLite mode)

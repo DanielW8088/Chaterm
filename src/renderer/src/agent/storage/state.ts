@@ -12,7 +12,7 @@ import {
 } from './shared'
 import { GlobalStateKey, SecretKey } from './state-keys'
 import { storageContext } from './storage-context'
-import { getUserInfo } from '@/utils/permission'
+import { userInfoStore } from '@/store/index'
 import { userConfigStore } from '@/store/userConfigStore'
 import { markSyncMetaDirty } from '@/services/configSyncManager'
 
@@ -546,9 +546,9 @@ export async function resetExtensionState() {
 }
 
 export async function getUserId(): Promise<any> {
-  const userInfo = getUserInfo()
-  if (userInfo && userInfo.uid) {
-    return userInfo.uid
+  const { uid } = userInfoStore().userInfo
+  if (uid) {
+    return uid
   } else {
     return null
   }

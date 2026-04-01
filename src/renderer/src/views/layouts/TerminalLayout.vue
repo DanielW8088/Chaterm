@@ -1,5 +1,5 @@
 <template>
-  <a-watermark v-bind="watermarkContent">
+  <div>
     <div
       v-if="contextMenu.visible"
       ref="contextMenuRef"
@@ -302,7 +302,7 @@
         </div>
       </div>
     </div>
-  </a-watermark>
+  </div>
 </template>
 <script setup lang="ts">
 interface ResizeParams {
@@ -313,7 +313,7 @@ interface ResizeParams {
 import { useI18n } from 'vue-i18n'
 import { userConfigStore } from '@/services/userConfigStoreService'
 import { userConfigStore as piniaUserConfigStore } from '@/store/userConfigStore'
-import { computed, nextTick, onBeforeUnmount, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, onUnmounted, ref, watch } from 'vue'
 import { Pane, Splitpanes } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
 import AiTab from '@views/components/AiTab/index.vue'
@@ -333,7 +333,6 @@ import TabsPanel from './tabsPanel.vue'
 import ExtensionViewHost from './ExtensionViewHost.vue'
 import EditorActions from './components/EditorActions.vue'
 import { v4 as uuidv4 } from 'uuid'
-import { userInfoStore } from '@/store'
 import { aliasConfigStore } from '@/store/aliasConfigStore'
 import eventBus from '@/utils/eventBus'
 import { getActualTheme, initializeThemeFromDatabase } from '@/utils/themeUtils'
@@ -378,26 +377,10 @@ const isTransparent = computed(() => !!configStore.getUserConfig.background.imag
 const headerRef = ref<InstanceType<typeof Header> | null>(null)
 const allTabs = ref<InstanceType<typeof TabsPanel> | null>(null)
 const assetsRef = ref<InstanceType<typeof Assets> | null>(null)
-const watermarkContent = reactive({
-  content: computed(() => {
-    if (!showWatermark.value) {
-      return ['']
-    }
-    const info = userInfoStore().userInfo
-    return [info.name || 'User', info.email || '']
-  }),
-  font: {
-    fontSize: 12,
-    color: computed(() => (currentTheme.value === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'))
-  },
-  rotate: -22,
-  gap: [150, 100] as [number, number]
-})
 
 const leftPaneSize = ref(21.097)
 const agentsLeftPaneSize = ref(27)
 const mainTerminalSize = ref(100)
-const showWatermark = ref(true)
 const currentTheme = ref('dark')
 const aiSidebarSize = ref(0)
 const aiMinSize = ref(0) // AI sidebar minimum size percentage
@@ -782,9 +765,6 @@ onMounted(async () => {
   ;(globalThis as any).__ctrlWHandler = handleCtrlW
   window.addEventListener('keydown', handleCloseTabKeyDown)
 
-  eventBus.on('updateWatermark', (watermark) => {
-    showWatermark.value = watermark !== 'close'
-  })
   eventBus.on('updateTheme', (theme) => {
     const actualTheme = getActualTheme(theme)
     currentTheme.value = actualTheme
@@ -818,15 +798,8 @@ onMounted(async () => {
         await captureExtensionUsage(extension.name, status, { trigger: 'app_startup' })
       }
     }, 2000)
-
-    nextTick(() => {
-      showWatermark.value = config.watermark !== 'close'
-    })
   } catch (e) {
     currentTheme.value = getActualTheme('dark')
-    nextTick(() => {
-      showWatermark.value = true
-    })
   }
   nextTick(() => {
     updateLeftSidebarMinSize()

@@ -120,7 +120,6 @@ import { userConfigStore } from '../../../store/userConfigStore'
 import { userConfigStore as serviceUserConfig } from '@/services/userConfigStoreService'
 import { v4 as uuidv4 } from 'uuid'
 import { Base64Util } from '@/utils/base64'
-import { userInfoStore } from '@/store/index'
 import stripAnsi from 'strip-ansi'
 import { commandBarHeight, inputManager } from './utils/termInputManager'
 import { shellCommands } from './utils/shellCmd'
@@ -1540,7 +1539,6 @@ const connectSSH = async (_opts?: { isAutoReconnect?: boolean }) => {
         passphrase.value = props.connectData.passphrase || ''
       }
 
-      const email = userInfoStore().userInfo.email
       const isAutoReconnect = _opts?.isAutoReconnect === true
       const shouldFocusAfterConnect = !isAutoReconnect && props.isActive && props.activeTabId === props.currentConnectionId
 
@@ -1582,7 +1580,7 @@ const connectSSH = async (_opts?: { isAutoReconnect?: boolean }) => {
           waitingForNetworkRestore.value = false
           autoReconnectAttempts.value = 0
           if (!isAutoReconnect) {
-            const welcomeName = email.split('@')[0] || userInfoStore().userInfo.name
+            const welcomeName = 'User'
             const welcome = '\x1b[38;2;22;119;255m' + t('ssh.welcomeMessage', { username: welcomeName }) + ' \x1b[m\r\n'
             terminal.value?.writeln('')
             terminal.value?.writeln(welcome)
@@ -1691,7 +1689,7 @@ const connectSSH = async (_opts?: { isAutoReconnect?: boolean }) => {
           waitingForNetworkRestore.value = false
           autoReconnectAttempts.value = 0
           if (!isAutoReconnect) {
-            const welcomeName = email.split('@')[0] || userInfoStore().userInfo.name
+            const welcomeName = 'User'
             const welcome = '\x1b[38;2;22;119;255m' + t('ssh.welcomeMessage', { username: welcomeName }) + ' \x1b[m\r\n'
             terminal.value?.writeln('') // Add empty line separator
             terminal.value?.writeln(welcome)
@@ -1936,8 +1934,6 @@ const connectLocalSSH = async () => {
   connectionId.value = `localhost@127.0.0.1:local:${props.currentConnectionId}`
 
   try {
-    const email = userInfoStore().userInfo.email
-
     const localConfig = {
       id: connectionId.value,
       shell: props.serverInfo.data.uuid,
@@ -1946,7 +1942,7 @@ const connectLocalSSH = async () => {
 
     const result = await api.connectLocal(localConfig)
     if (result.success) {
-      const welcomeName = email.split('@')[0] || userInfoStore().userInfo.name
+      const welcomeName = 'User'
       const welcome = '\x1b[38;2;22;119;255m' + t('ssh.welcomeMessage', { username: welcomeName }) + ' \x1b[m\r\n'
       terminal.value?.writeln('') // Add empty line separator
       terminal.value?.writeln(welcome)

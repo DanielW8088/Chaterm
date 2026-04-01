@@ -44,11 +44,6 @@ export class DataSyncService {
     try {
       logger.info('Initializing data sync service...')
 
-      // Data sync requires server authentication; skip initialization
-      logger.info('Data sync disabled, no server authentication available')
-      this.isInitialized = true
-      return
-
       const rawConfig = await getStoredUserConfigSnapshot()
       const isDataSyncEnabled = resolveDataSyncPreference(rawConfig, true) === 'enabled'
       logger.info('User data sync config', { enabled: isDataSyncEnabled })

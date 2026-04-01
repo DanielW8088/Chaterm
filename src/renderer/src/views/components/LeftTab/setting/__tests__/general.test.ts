@@ -693,23 +693,6 @@ describe('General Component', () => {
     })
   })
 
-  describe('Watermark Settings', () => {
-    beforeEach(async () => {
-      wrapper = createWrapper()
-      await nextTick()
-      await nextTick()
-    })
-
-    it('should update watermark setting', async () => {
-      const vm = wrapper.vm as any
-      vm.userConfig.watermark = 'close'
-      await nextTick()
-      await nextTick() // Wait for watcher
-
-      expect(userConfigStore.saveConfig).toHaveBeenCalled()
-    })
-  })
-
   describe('System Theme Listener', () => {
     beforeEach(async () => {
       wrapper = createWrapper()
@@ -795,16 +778,6 @@ describe('General Component', () => {
       await nextTick() // Wait for watcher
 
       expect(userConfigStore.saveConfig).toHaveBeenCalled()
-    })
-
-    it('should emit updateWatermark event when config is saved', async () => {
-      const vm = wrapper.vm as any
-      vm.userConfig.watermark = 'close'
-      await nextTick()
-      await nextTick()
-
-      // saveConfig is called by watcher, which emits the event
-      expect(eventBus.emit).toHaveBeenCalledWith('updateWatermark', expect.any(String))
     })
 
     it('should handle save config errors', async () => {

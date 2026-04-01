@@ -101,7 +101,6 @@
 import { ref, onMounted, getCurrentInstance } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ArrowDownOutlined, RightOutlined } from '@ant-design/icons-vue'
-import { useDeviceStore } from '@/store/useDeviceStore'
 import { userConfigStore } from '@/services/userConfigStoreService'
 import TitleBar from './titleBar.vue'
 
@@ -112,7 +111,6 @@ const { t } = useI18n()
 const logger = createRendererLogger('header')
 
 const platform = ref<string>('')
-const deviceStore = useDeviceStore()
 const instance = getCurrentInstance()!
 const { appContext } = instance
 
@@ -194,18 +192,6 @@ defineExpose({
 
 onMounted(async () => {
   platform.value = await api.getPlatform()
-  try {
-    const localIP = await api.getLocalIP()
-    deviceStore.setDeviceIp(localIP)
-  } catch (error) {
-    logger.error('Failed to obtain IP address', { error: error })
-  }
-  try {
-    const macAddress = await api.getMacAddress()
-    deviceStore.setMacAddress(macAddress)
-  } catch (error) {
-    logger.error('Failed to obtain MAC address', { error: error })
-  }
   const userConfig = await userConfigStore.getConfig()
   logger.debug('User config loaded on mount')
   appContext.config.globalProperties.$i18n.locale = userConfig.language

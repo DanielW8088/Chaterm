@@ -20,7 +20,6 @@ export interface AppEvents {
   chatToAi: any
   sendMessageToAi: { content: string; tabId?: string }
   toggleMenu: any
-  updateWatermark: string // Update watermark status
   updateSecretRedaction: string // Update secret redaction status
   updateDataSync: string // Update data sync status
   keyChainUpdated: void // Keychain update event, used to sync key options in host configuration

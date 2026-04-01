@@ -165,19 +165,6 @@
             <a-select-option value="ar-AR">العربية</a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item
-          :label="$t('user.watermark')"
-          class="user_my-ant-form-item"
-        >
-          <a-radio-group
-            v-model:value="userConfig.watermark"
-            class="custom-radio-group"
-          >
-            <a-radio value="open">{{ $t('user.watermarkOpen') }}</a-radio>
-            <a-radio value="close">{{ $t('user.watermarkClose') }}</a-radio>
-          </a-radio-group>
-        </a-form-item>
-
         <!-- Editor Settings -->
         <a-form-item class="editor-settings-section">
           <template #label>
@@ -351,8 +338,7 @@ const loadSavedConfig = async () => {
           opacity: 0.8,
           brightness: 1.0,
           mode: 'none'
-        },
-        watermark: (savedConfig.watermark || 'open') as 'open' | 'close'
+        }
       } as any
 
       const normalizedSystemBg = normalizeSystemBackgroundImage(userConfig.value.background.image)
@@ -392,14 +378,12 @@ const saveConfig = async () => {
   try {
     const configToStore = {
       language: userConfig.value.language,
-      watermark: (userConfig.value.watermark || 'open') as 'open' | 'close',
       theme: userConfig.value.theme,
       defaultLayout: userConfig.value.defaultLayout,
       lastCustomImage: userConfig.value.lastCustomImage,
       background: userConfig.value.background
     }
     await userConfigStore.saveConfig(configToStore as any)
-    eventBus.emit('updateWatermark', configToStore.watermark)
     eventBus.emit('updateTheme', configToStore.theme)
   } catch (error) {
     logger.error('Failed to save config', { error: error })

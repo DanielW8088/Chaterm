@@ -65,7 +65,6 @@ declare module 'vue' {
     ATooltip: typeof import('ant-design-vue/es')['Tooltip']
     ATree: typeof import('ant-design-vue/es')['Tree']
     ATypographyText: typeof import('ant-design-vue/es')['TypographyText']
-    AWatermark: typeof import('ant-design-vue/es')['Watermark']
     CommandDialog: typeof import('./src/components/global/CommandDialog.vue')['default']
     CommandInteractionInput: typeof import('./src/components/agent/CommandInteractionInput.vue')['default']
     MfaDialog: typeof import('./src/components/global/mfa/MfaDialog.vue')['default']

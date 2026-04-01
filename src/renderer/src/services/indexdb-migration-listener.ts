@@ -1,4 +1,4 @@
-import { getUserInfo } from '@/utils/permission'
+import { userInfoStore } from '@/store/index'
 
 const logger = createRendererLogger('service.indexdbMigration')
 
@@ -101,11 +101,10 @@ export function setupIndexDBMigrationListener(): void {
 
           logger.info('Found valid ChatermStorage databases (unknown excluded)', { count: chatermDbs.length })
 
-          // Get current user ID (using getUserInfo)
+          // Get current user ID
           let currentUserId: number | undefined
           try {
-            const userInfo = getUserInfo()
-            currentUserId = userInfo?.uid
+            currentUserId = userInfoStore().userInfo?.uid
             logger.info('Current logged-in user ID', { userId: currentUserId || 'Unable to get' })
           } catch (error) {
             logger.warn('Unable to get current user ID', { error: error })

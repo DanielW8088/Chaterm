@@ -72,13 +72,10 @@ vi.mock('@ant-design/icons-vue', () => ({
 // Import mocked modules
 import { userConfigStore } from '@/services/userConfigStoreService'
 import eventBus from '@/utils/eventBus'
-import { useDeviceStore } from '@/store/useDeviceStore'
 
 describe('Header Component', () => {
   let wrapper: VueWrapper<any>
   let pinia: ReturnType<typeof createPinia>
-  let deviceStore: ReturnType<typeof useDeviceStore>
-
   const createWrapper = (options = {}) => {
     const wrapper = mount(Header, {
       global: {
@@ -114,8 +111,6 @@ describe('Header Component', () => {
     // Setup Pinia
     pinia = createPinia()
     setActivePinia(pinia)
-    deviceStore = useDeviceStore()
-
     // Setup window.api mock
     global.window = global.window || ({} as Window & typeof globalThis)
     ;(global.window as unknown as Record<string, unknown>).api = mockWindowApi
@@ -165,18 +160,6 @@ describe('Header Component', () => {
       expect(mockWindowApi.getPlatform).toHaveBeenCalled()
     })
 
-    it('should fetch device IP and MAC address on mount', async () => {
-      wrapper = createWrapper()
-
-      await wrapper.vm.$nextTick()
-      await new Promise((resolve) => setTimeout(resolve, 100))
-
-      expect(mockWindowApi.getLocalIP).toHaveBeenCalled()
-      expect(mockWindowApi.getMacAddress).toHaveBeenCalled()
-      expect(deviceStore.ip).toBe('192.168.1.1')
-      expect(deviceStore.macAddress).toBe('00:11:22:33:44:55')
-    })
-
     it('should load user config on mount', async () => {
       wrapper = createWrapper()
 
@@ -193,20 +176,6 @@ describe('Header Component', () => {
       await new Promise((resolve) => setTimeout(resolve, 100))
 
       expect(mockWindowApi.checkUpdate).toHaveBeenCalled()
-    })
-
-    it('should handle errors when fetching device information', async () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-      mockWindowApi.getLocalIP.mockRejectedValue(new Error('Network error'))
-      mockWindowApi.getMacAddress.mockRejectedValue(new Error('Network error'))
-
-      wrapper = createWrapper()
-
-      await wrapper.vm.$nextTick()
-      await new Promise((resolve) => setTimeout(resolve, 100))
-
-      expect(consoleErrorSpy).toHaveBeenCalled()
-      consoleErrorSpy.mockRestore()
     })
   })
 
