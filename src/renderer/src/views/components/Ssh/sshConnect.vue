@@ -1579,13 +1579,6 @@ const connectSSH = async (_opts?: { isAutoReconnect?: boolean }) => {
           disconnectedByNetwork.value = false
           waitingForNetworkRestore.value = false
           autoReconnectAttempts.value = 0
-          if (!isAutoReconnect) {
-            const welcomeName = 'User'
-            const welcome = '\x1b[38;2;22;119;255m' + t('ssh.welcomeMessage', { username: welcomeName }) + ' \x1b[m\r\n'
-            terminal.value?.writeln('')
-            terminal.value?.writeln(welcome)
-            terminal.value?.writeln(t('ssh.connectingTo', { ip: props.connectData.ip }))
-          }
           await startShell()
           shellOpenedAt = Date.now()
           setupTerminalInput()
@@ -1688,13 +1681,6 @@ const connectSSH = async (_opts?: { isAutoReconnect?: boolean }) => {
           disconnectedByNetwork.value = false
           waitingForNetworkRestore.value = false
           autoReconnectAttempts.value = 0
-          if (!isAutoReconnect) {
-            const welcomeName = 'User'
-            const welcome = '\x1b[38;2;22;119;255m' + t('ssh.welcomeMessage', { username: welcomeName }) + ' \x1b[m\r\n'
-            terminal.value?.writeln('') // Add empty line separator
-            terminal.value?.writeln(welcome)
-            terminal.value?.writeln(t('ssh.connectingTo', { ip: props.connectData.ip }))
-          }
           await startShell()
           shellOpenedAt = Date.now()
           setupTerminalInput()
@@ -1942,11 +1928,6 @@ const connectLocalSSH = async () => {
 
     const result = await api.connectLocal(localConfig)
     if (result.success) {
-      const welcomeName = 'User'
-      const welcome = '\x1b[38;2;22;119;255m' + t('ssh.welcomeMessage', { username: welcomeName }) + ' \x1b[m\r\n'
-      terminal.value?.writeln('') // Add empty line separator
-      terminal.value?.writeln(welcome)
-
       await startLocalShell()
 
       // Handle input
