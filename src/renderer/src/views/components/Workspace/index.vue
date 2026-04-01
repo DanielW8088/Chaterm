@@ -104,6 +104,10 @@
                     @click="handleFolderRowClick($event, dataRef)"
                   >
                     <span v-if="editingNode !== dataRef.key">
+                      <FolderOutlined
+                        v-if="dataRef.isAssetGroup"
+                        class="folder-icon"
+                      />
                       {{ title }}
                       <span
                         v-if="!isSecondLevel(dataRef) && getOriginalChildrenCount(dataRef) > 0"
@@ -175,6 +179,10 @@
                     @contextmenu="handleContextMenu($event, dataRef)"
                   >
                     <span v-if="editingNode !== dataRef.key">
+                      <FolderOutlined
+                        v-if="dataRef.isAssetGroup"
+                        class="folder-icon"
+                      />
                       {{ title }}
                       <span
                         v-if="!isSecondLevel(dataRef) && getOriginalChildrenCount(dataRef) > 0"
@@ -1444,8 +1452,8 @@ onUnmounted(() => {
     }
   }
 
-  .ant-tree-indent {
-    display: none !important;
+  .ant-tree-indent-unit {
+    width: 16px;
   }
 }
 
@@ -1487,6 +1495,13 @@ onUnmounted(() => {
       margin-right: 6px;
       font-size: 14px;
       color: var(--text-color);
+      flex-shrink: 0;
+    }
+
+    .folder-icon {
+      margin-right: 4px;
+      font-size: 14px;
+      color: var(--text-color-tertiary);
       flex-shrink: 0;
     }
 
