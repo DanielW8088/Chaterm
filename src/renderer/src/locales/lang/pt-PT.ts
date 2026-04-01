@@ -217,7 +217,7 @@ export default {
     general: 'Geral',
     extensions: 'Extensões',
     about: 'Sobre',
-    documentation: 'Documentação',
+
     privacy: 'Privacidade',
     secretRedaction: 'Redação secreta',
     secretRedactionDescription:
@@ -1045,10 +1045,7 @@ export default {
     logDiagnostics: 'Registos e diagnostico',
     logDiagnosticsDesc:
       'Se encontrar problemas, pode exportar os ficheiros de registo e envia-los aos programadores para ajudar na resolucao de problemas.',
-    openLogDir: 'Abrir diretorio de registos',
-    feedbackTitle: 'Feedback e sugestoes',
-    feedbackDesc: 'Se tiver alguma pergunta, sugestao ou feedback, entre em contacto connosco atraves do seguinte canal.',
-    submitFeedback: 'Enviar feedback'
+    openLogDir: 'Abrir diretorio de registos'
   },
   mfa: {
     title: 'Autenticação de dois fatores',

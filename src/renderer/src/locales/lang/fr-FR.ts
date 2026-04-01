@@ -217,7 +217,7 @@ export default {
     general: 'Général',
     extensions: 'Extensions',
     about: 'À propos',
-    documentation: 'Documentation',
+
     privacy: 'Confidentialité',
     secretRedaction: 'Redaction secrète',
     secretRedactionDescription:
@@ -1050,10 +1050,7 @@ export default {
     install: 'Installer',
     logDiagnostics: 'Journaux et diagnostics',
     logDiagnosticsDesc: 'En cas de probleme, vous pouvez exporter les fichiers journaux et les envoyer aux developpeurs pour aider au diagnostic.',
-    openLogDir: 'Ouvrir le repertoire des journaux',
-    feedbackTitle: 'Commentaires et suggestions',
-    feedbackDesc: "Si vous avez des questions, des suggestions ou des commentaires, n'hesitez pas a nous contacter via le canal suivant.",
-    submitFeedback: 'Soumettre un commentaire'
+    openLogDir: 'Ouvrir le repertoire des journaux'
   },
   mfa: {
     title: 'Authentification à deux facteurs',

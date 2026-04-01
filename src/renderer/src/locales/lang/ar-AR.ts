@@ -205,7 +205,7 @@ export default {
     general: 'العام',
     extensions: 'الامتدادات',
     about: 'عن',
-    documentation: 'الوثائق',
+
     privacy: 'الخصوصية',
     secretRedaction: 'التحرير السري',
     secretRedactionDescription:
@@ -1020,10 +1020,7 @@ export default {
     install: 'تثبيت',
     logDiagnostics: 'السجلات والتشخيصات',
     logDiagnosticsDesc: 'إذا كنت تواجه مشكلات, يمكنك تصدير ملفات السجل وإرسالها إلى المطورين لمساعدتك في حل المشكلات.',
-    openLogDir: 'فتح مجلد السجلات',
-    feedbackTitle: 'الملاحظات والاقتراحات',
-    feedbackDesc: 'إذا كنت تواجه مشكلات, يمكنك تصدير ملفات السجل وإرسالها إلى المطورين لمساعدتك في حل المشكلات.',
-    submitFeedback: 'إرسال الملاحظات'
+    openLogDir: 'فتح مجلد السجلات'
   },
   mfa: {
     title: 'التحقق من المصادقة الثنائية',

@@ -217,7 +217,7 @@ export default {
     general: '一般',
     extensions: '拡張機能',
     about: 'について',
-    documentation: 'ドキュメント',
+
     privacy: 'プライバシー',
     secretRedaction: '機密情報の編集',
     secretRedactionDescription:
@@ -1037,10 +1037,7 @@ export default {
     install: 'インストール',
     logDiagnostics: 'ログと診断',
     logDiagnosticsDesc: '問題が発生した場合、ログファイルをエクスポートして開発者に送信し、問題の調査にお役立てください。',
-    openLogDir: 'ログディレクトリを開く',
-    feedbackTitle: 'フィードバックと提案',
-    feedbackDesc: 'ご質問、ご提案、フィードバックがございましたら、以下のチャネルからお気軽にご連絡ください。',
-    submitFeedback: 'フィードバックを送信'
+    openLogDir: 'ログディレクトリを開く'
   },
   mfa: {
     title: '二要素認証',

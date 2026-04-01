@@ -50,28 +50,13 @@
         {{ t('about.openLogDir') }}
       </button>
     </div>
-
-    <div class="feedback-section">
-      <div class="feedback-title">
-        <CommentOutlined style="margin-right: 6px" />
-        {{ t('about.feedbackTitle') }}
-      </div>
-      <div class="feedback-desc">{{ t('about.feedbackDesc') }}</div>
-      <button
-        class="feedback-btn"
-        @click="onSubmitFeedback"
-      >
-        <ExportOutlined style="margin-right: 6px" />
-        {{ t('about.submitFeedback') }}
-      </button>
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Notice } from '../../Notice'
-import { FolderOpenOutlined, CommentOutlined, ExportOutlined } from '@ant-design/icons-vue'
+import { FolderOpenOutlined } from '@ant-design/icons-vue'
 import i18n from '@/locales'
 import { getEditionConfig } from '@/utils/edition'
 
@@ -92,11 +77,6 @@ const onOpenLogDir = async () => {
       error: error
     })
   }
-}
-
-const onSubmitFeedback = () => {
-  logger.info('Opening feedback page', { event: 'settings.about.feedback.open' })
-  window.open('https://github.com/chaterm/Chaterm/issues', '_blank')
 }
 
 const newVersion = ref()
@@ -310,42 +290,5 @@ const handleCheckUpdate = async () => {
 .log-diagnostics-btn:hover {
   background: var(--bg-color-default);
   color: var(--text-color);
-}
-.feedback-section {
-  width: 90%;
-  max-width: 600px;
-  margin: 16px auto 0;
-  padding: 16px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-}
-.feedback-title {
-  display: flex;
-  align-items: center;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-color);
-  margin-bottom: 6px;
-}
-.feedback-desc {
-  font-size: 12px;
-  color: var(--text-color-secondary);
-  margin-bottom: 12px;
-  line-height: 1.5;
-}
-.feedback-btn {
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 14px;
-  background: transparent;
-  color: #1890ff;
-  border: 1px solid #1890ff;
-  border-radius: 6px;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.feedback-btn:hover {
-  background: rgba(24, 144, 255, 0.1);
 }
 </style>

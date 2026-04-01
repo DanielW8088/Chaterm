@@ -217,7 +217,7 @@ export default {
     general: 'Общий',
     extensions: 'Расширения',
     about: 'Обо мне',
-    documentation: 'Документация',
+
     privacy: 'Конфиденциальность',
     secretRedaction: 'Скрытие секретов',
     secretRedactionDescription:
@@ -1044,10 +1044,7 @@ export default {
     logDiagnostics: 'Журналы и диагностика',
     logDiagnosticsDesc:
       'При возникновении проблем вы можете экспортировать файлы журналов и отправить их разработчикам для помощи в устранении неполадок.',
-    openLogDir: 'Открыть каталог журналов',
-    feedbackTitle: 'Отзывы и предложения',
-    feedbackDesc: 'Если у вас есть вопросы, предложения или отзывы, свяжитесь с нами через следующий канал.',
-    submitFeedback: 'Отправить отзыв'
+    openLogDir: 'Открыть каталог журналов'
   },
   mfa: {
     title: 'Двухфакторная аутентификация',

@@ -217,7 +217,7 @@ export default {
     general: '일반',
     extensions: '확장 기능',
     about: '소개',
-    documentation: '문서',
+
     privacy: '개인 정보 보호',
     secretRedaction: '비밀 정보 숨기기',
     secretRedactionDescription: '비밀 정보 숨기기 기능은 AI 대화 출력에서 비밀 정보와 민감한 정보를 자동으로 숨기려고 시도합니다.',
@@ -1033,10 +1033,7 @@ export default {
     install: '설치',
     logDiagnostics: '로그 및 진단',
     logDiagnosticsDesc: '문제가 발생하면 로그 파일을 내보내 개발자에게 전송하여 문제 해결에 도움을 받을 수 있습니다.',
-    openLogDir: '로그 디렉터리 열기',
-    feedbackTitle: '피드백 및 제안',
-    feedbackDesc: '질문, 제안 또는 피드백이 있으시면 아래 채널을 통해 연락해 주세요.',
-    submitFeedback: '피드백 제출'
+    openLogDir: '로그 디렉터리 열기'
   },
   mfa: {
     title: '이중 인증',

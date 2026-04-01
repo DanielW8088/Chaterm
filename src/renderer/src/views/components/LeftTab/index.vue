@@ -98,18 +98,7 @@
         :title="i.name"
         :mouse-enter-delay="1"
       >
-        <div v-if="i.key === 'user'">
-          <p
-            class="setting_menu"
-            :class="{ active: activeKey === i.key }"
-            @click="showUserMenu = !showUserMenu"
-          >
-            <img
-              :src="i.icon"
-              alt=""
-            />
-          </p>
-        </div>
+        <div v-if="i.key === 'user'"></div>
         <div v-else-if="i.key === 'setting'">
           <p
             class="setting_menu"
@@ -136,12 +125,6 @@
         </div>
       </a-tooltip>
     </div>
-
-    <div
-      v-if="showUserMenu"
-      class="user-menu"
-    >
-    </div>
   </div>
 </template>
 
@@ -157,7 +140,6 @@ const logger = createRendererLogger('leftTab')
 const pluginViews = ref<any[]>([])
 const userStore = userInfoStore(pinia)
 const activeKey = ref('workspace')
-const showUserMenu = ref<boolean>(false)
 
 const menuClick = (key) => {
   let type = ''
@@ -222,12 +204,10 @@ const openAiRight = () => {
 }
 const userConfig = () => {
   emit('open-user-tab', 'userConfig')
-  showUserMenu.value = false
 }
 
 const files = (key) => {
   emit('open-user-tab', 'files')
-  showUserMenu.value = false
   menuClick(key)
 }
 
@@ -308,34 +288,6 @@ onUnmounted(() => {
     &.active img {
       opacity: 1;
       transform: scale(1.1);
-    }
-  }
-
-  .user-menu {
-    position: absolute;
-    bottom: 40px;
-    left: 40px;
-    background: var(--bg-color-secondary);
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-    min-width: 120px;
-    border: 1px solid var(--border-color);
-
-    .menu-item {
-      padding: 4px 12px;
-      color: var(--text-color);
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-size: 14px;
-
-      &:hover {
-        background: var(--hover-bg-color);
-      }
-
-      &:active {
-        background: var(--active-bg-color);
-      }
     }
   }
 }

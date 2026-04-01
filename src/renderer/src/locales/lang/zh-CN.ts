@@ -215,7 +215,7 @@ export default {
     general: '通用',
     extensions: '扩展',
     about: '关于',
-    documentation: '文档',
+
     privacy: '隐私',
     secretRedaction: '密文脱敏',
     secretRedactionDescription: '密文脱敏功能旨在自动从您的AI对话框输出中遮盖密码、IP 地址、API 密钥和个人身份信息等秘密和敏感信息。',
@@ -1028,10 +1028,7 @@ export default {
     install: '安装',
     logDiagnostics: '日志与诊断',
     logDiagnosticsDesc: '如果遇到问题，您可以导出日志文件发送给开发者以帮助排查问题。',
-    openLogDir: '打开日志目录',
-    feedbackTitle: '反馈与建议',
-    feedbackDesc: '如果您有任何问题、建议或反馈，欢迎通过以下渠道联系我们。',
-    submitFeedback: '提交反馈'
+    openLogDir: '打开日志目录'
   },
   mfa: {
     title: '二次验证',

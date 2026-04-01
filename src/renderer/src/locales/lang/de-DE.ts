@@ -217,7 +217,7 @@ export default {
     general: 'Allgemein',
     extensions: 'Erweiterungen',
     about: 'Über',
-    documentation: 'Dokumentation',
+
     privacy: 'Datenschutz',
     secretRedaction: 'Geheimtext-Redaktion',
     secretRedactionDescription:
@@ -1045,10 +1045,7 @@ export default {
     install: 'Installieren',
     logDiagnostics: 'Protokolle & Diagnose',
     logDiagnosticsDesc: 'Bei Problemen koennen Sie Protokolldateien exportieren und an die Entwickler senden, um bei der Fehlerbehebung zu helfen.',
-    openLogDir: 'Protokollverzeichnis oeffnen',
-    feedbackTitle: 'Feedback & Vorschlaege',
-    feedbackDesc: 'Wenn Sie Fragen, Vorschlaege oder Feedback haben, kontaktieren Sie uns gerne ueber den folgenden Kanal.',
-    submitFeedback: 'Feedback senden'
+    openLogDir: 'Protokollverzeichnis oeffnen'
   },
   mfa: {
     title: 'Zwei-Faktor-Authentifizierung',

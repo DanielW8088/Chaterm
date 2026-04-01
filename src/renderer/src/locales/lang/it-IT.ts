@@ -217,7 +217,7 @@ export default {
     general: 'Generale',
     extensions: 'Estensioni',
     about: 'Informazioni',
-    documentation: 'Documentazione',
+
     privacy: 'Privacy',
     secretRedaction: 'Oscuramento segreti',
     secretRedactionDescription:
@@ -1045,9 +1045,7 @@ export default {
     logDiagnostics: 'Log e diagnostica',
     logDiagnosticsDesc: 'In caso di problemi, puoi esportare i file di log e inviarli agli sviluppatori per aiutare nella risoluzione dei problemi.',
     openLogDir: 'Apri cartella dei log',
-    feedbackTitle: 'Feedback e suggerimenti',
-    feedbackDesc: 'Se hai domande, suggerimenti o feedback, non esitare a contattarci attraverso il seguente canale.',
-    submitFeedback: 'Invia feedback',
+
     uploadSkipped: 'Caricamento saltato',
     transferSkipped: 'Trasferimento saltato',
     transferCancel: 'Trasferimento annullato',
