@@ -32,12 +32,10 @@ import { ApiConfiguration, ApiProvider, PROVIDER_MODEL_KEY_MAP } from '@shared/a
 import { TITLE_GENERATION_PROMPT, TITLE_GENERATION_PROMPT_CN } from '../prompts/system'
 import { DEFAULT_LANGUAGE_SETTINGS } from '@shared/Languages'
 import type { CommandGenerationContext } from '@shared/WebviewMessage'
-import { isChineseEdition } from '../../../config/edition'
 import { mark } from '@perf'
 const logger = createLogger('agent')
 // TODO: Replace hardcoded model names with chaterm-model configuration
-const AI_SUGGEST_MODEL_CN = 'Qwen-Plus'
-const AI_SUGGEST_MODEL_GLOBAL = 'gemini-3-pro'
+const AI_SUGGEST_MODEL = 'gemini-3-pro'
 
 export class Controller {
   private postMessage: (message: ExtensionMessage) => Promise<boolean> | undefined
@@ -963,7 +961,7 @@ EXP: ${exampleExp}`
   }
 
   private getFixedAiSuggestModelId(): string {
-    return isChineseEdition() ? AI_SUGGEST_MODEL_CN : AI_SUGGEST_MODEL_GLOBAL
+    return AI_SUGGEST_MODEL
   }
 
   /**

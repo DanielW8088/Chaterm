@@ -42,7 +42,7 @@ export interface KeywordHit {
 }
 
 export interface EmbeddingConfig {
-  region: 'global' | 'cn'
+  region: 'global'
   apiKey: string
   baseUrl: string
 }

@@ -48,7 +48,7 @@ const messages = {
   }
 }
 
-// Get default language from edition config (cn -> zh-CN, global -> en-US)
+// Get default language from edition config
 const defaultLanguage = getDefaultLanguage()
 
 const i18n = createI18n({

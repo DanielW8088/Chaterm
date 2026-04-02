@@ -10,11 +10,9 @@ import pkg from './package.json'
 const publicDir = resolve('resources')
 const envDir = resolve('build')
 
-type Edition = 'cn' | 'global'
-
-// Edition configuration interface (must match build/edition-config/*.json structure)
+// Edition configuration interface (must match build/edition-config/global.json structure)
 interface EditionConfig {
-  edition: Edition
+  edition: string
   displayName: string
   api: {
     baseUrl: string
@@ -47,38 +45,21 @@ interface EditionConfig {
  * Load edition configuration from JSON file
  * This is the single source of truth for all edition-specific URLs
  */
-const loadEditionConfig = (edition: Edition): EditionConfig => {
-  const configPath = resolve(`build/edition-config/${edition}.json`)
+const loadEditionConfig = (): EditionConfig => {
+  const configPath = resolve('build/edition-config/global.json')
   try {
     const content = readFileSync(configPath, 'utf-8')
     return JSON.parse(content) as EditionConfig
   } catch (error) {
-    throw new Error(`Edition config not found for: ${edition}`)
+    throw new Error(`Edition config not found: ${configPath}`)
   }
-}
-
-const resolveEdition = (mode: string | undefined): Edition => {
-  if (process.env.APP_EDITION === 'cn' || process.env.APP_EDITION === 'global') {
-    return process.env.APP_EDITION
-  }
-
-  if (mode?.endsWith('.cn')) {
-    return 'cn'
-  }
-
-  if (mode?.endsWith('.global')) {
-    return 'global'
-  }
-
-  return 'cn'
 }
 
 export default defineConfig(({ mode }) => {
   const resolvedMode = mode || 'development'
-  const edition = resolveEdition(resolvedMode)
 
   // Load edition config from JSON (single source of truth)
-  const editionConfig = loadEditionConfig(edition)
+  const editionConfig = loadEditionConfig()
 
   // Load environment variables from the appropriate .env file
   // Note: Must specify 'RENDERER_' prefix since project uses RENDERER_* variables
@@ -115,7 +96,7 @@ export default defineConfig(({ mode }) => {
         }
       },
       define: {
-        'process.env.APP_EDITION': JSON.stringify(edition),
+        'process.env.APP_EDITION': JSON.stringify('global'),
         'process.env.LOG_LEVEL': JSON.stringify(resolvedMode.startsWith('development') ? 'debug' : 'info')
       },
       build: {
@@ -200,7 +181,7 @@ export default defineConfig(({ mode }) => {
         },
         // Inject edition config to renderer process (single source of truth)
         __EDITION_CONFIG__: JSON.stringify(editionConfig),
-        'import.meta.env.RENDERER_APP_EDITION': JSON.stringify(edition)
+        'import.meta.env.RENDERER_APP_EDITION': JSON.stringify('global')
       },
       css: {
         preprocessorOptions: {

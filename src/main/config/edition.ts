@@ -1,8 +1,8 @@
 /**
  * Edition configuration module for main process
- * Loads and manages edition-specific configuration (CN/Global)
+ * Loads and manages edition-specific configuration from build/edition-config/global.json
  *
- * IMPORTANT: All edition-specific URLs are defined in build/edition-config/*.json
+ * IMPORTANT: All edition-specific URLs are defined in build/edition-config/global.json
  * This is the single source of truth - do NOT hardcode URLs elsewhere
  */
 import { app } from 'electron'
@@ -10,10 +10,8 @@ import * as path from 'path'
 import * as fs from 'fs'
 const logger = createLogger('config')
 
-export type Edition = 'cn' | 'global'
-
 export interface EditionConfig {
-  edition: Edition
+  edition: string
   displayName: string
   api: {
     baseUrl: string
@@ -47,35 +45,9 @@ let userDataPath: string | null = null
 let userDataPathInitialized = false
 
 /**
- * Get current edition from environment variable
- * Default to 'cn' per spec 3.6
- */
-export function getEdition(): Edition {
-  return (process.env.APP_EDITION as Edition) || 'cn'
-}
-
-/**
- * Check if current edition is Chinese edition
- */
-export function isChineseEdition(): boolean {
-  return getEdition() === 'cn'
-}
-
-/**
- * Check if current edition is Global edition
- */
-export function isGlobalEdition(): boolean {
-  return getEdition() === 'global'
-}
-
-/**
- * Initialize the userData path based on edition.
+ * Initialize the userData path.
  * This function MUST be called at the very beginning of the app startup,
  * before any other module tries to access userData.
- *
- * Path mapping:
- * - CN edition:     ~/Library/Application Support/chaterm (default, backward compatible)
- * - Global edition: ~/Library/Application Support/chaterm-global
  */
 export function initUserDataPath(): void {
   if (userDataPathInitialized) {
@@ -83,18 +55,10 @@ export function initUserDataPath(): void {
   }
 
   try {
-    const edition = getEdition()
-
-    if (edition === 'global') {
-      // Global edition uses a separate directory
-      const basePath = app.getPath('appData')
-      const customPath = path.join(basePath, 'chaterm-global')
-      app.setPath('userData', customPath)
-      userDataPath = customPath
-    } else {
-      // CN edition uses the default 'chaterm' directory (backward compatible)
-      userDataPath = app.getPath('userData')
-    }
+    const basePath = app.getPath('appData')
+    const customPath = path.join(basePath, 'chaterm')
+    app.setPath('userData', customPath)
+    userDataPath = customPath
   } catch (error) {
     // Fallback for test environment or non-Electron environment
     userDataPath = path.join(process.cwd(), 'test_data')
@@ -115,19 +79,17 @@ export function getUserDataPath(): string {
 }
 
 /**
- * Get protocol prefix based on edition
- * Returns 'chaterm-cn://' for Chinese edition, 'chaterm://' for others
+ * Get protocol prefix for deep linking
  */
 export function getProtocolPrefix(): string {
-  return isChineseEdition() ? 'chaterm-cn://' : 'chaterm://'
+  return 'chaterm://'
 }
 
 /**
- * Get protocol name (without ://) based on edition
- * Returns 'chaterm-cn' for Chinese edition, 'chaterm' for others
+ * Get protocol name (without ://)
  */
 export function getProtocolName(): string {
-  return isChineseEdition() ? 'chaterm-cn' : 'chaterm'
+  return 'chaterm'
 }
 
 /**
@@ -139,11 +101,9 @@ export function loadEditionConfig(): EditionConfig {
     return cachedConfig
   }
 
-  const edition = getEdition()
-
   // Try to load from packaged resources first, then from dev path
-  const packagedConfigPath = path.join(process.resourcesPath || '', `edition-config/${edition}.json`)
-  const devConfigPath = path.join(process.cwd(), `build/edition-config/${edition}.json`)
+  const packagedConfigPath = path.join(process.resourcesPath || '', 'edition-config/global.json')
+  const devConfigPath = path.join(process.cwd(), 'build/edition-config/global.json')
 
   let configPath: string | null = null
 
@@ -154,14 +114,13 @@ export function loadEditionConfig(): EditionConfig {
   }
 
   if (!configPath) {
-    // This should never happen in production - config files must exist
-    throw new Error(`[Edition] Config file not found for edition: ${edition}. ` + `Checked paths: ${packagedConfigPath}, ${devConfigPath}`)
+    throw new Error(`[Edition] Config file not found. Checked paths: ${packagedConfigPath}, ${devConfigPath}`)
   }
 
   try {
     const configContent = fs.readFileSync(configPath, 'utf-8')
     cachedConfig = JSON.parse(configContent) as EditionConfig
-    logger.info('Loaded edition configuration', { edition, configPath })
+    logger.info('Loaded edition configuration', { configPath })
     return cachedConfig
   } catch (error) {
     throw new Error(`[Edition] Failed to parse config file: ${configPath}, error: ${error}`)
@@ -183,70 +142,70 @@ export function getEditionConfig(): EditionConfig {
 }
 
 /**
- * Get API base URL for current edition
+ * Get API base URL
  */
 export function getApiBaseUrl(): string {
   return loadEditionConfig().api.baseUrl
 }
 
 /**
- * Get KMS URL for current edition
+ * Get KMS URL
  */
 export function getKmsUrl(): string {
   return loadEditionConfig().api.kmsUrl
 }
 
 /**
- * Get sync URL for current edition
+ * Get sync URL
  */
 export function getSyncUrl(): string {
   return loadEditionConfig().api.syncUrl
 }
 
 /**
- * Get update server URL for current edition
+ * Get update server URL
  */
 export function getUpdateServerUrl(): string {
   return loadEditionConfig().update.serverUrl
 }
 
 /**
- * Get login base URL for current edition
+ * Get login base URL
  */
 export function getLoginBaseUrl(): string {
   return loadEditionConfig().auth.loginBaseUrl
 }
 
 /**
- * Get default language for current edition
+ * Get default language
  */
 export function getDefaultLanguage(): string {
   return loadEditionConfig().defaults.language
 }
 
 /**
- * Get privacy policy URL for current edition
+ * Get privacy policy URL
  */
 export function getPrivacyPolicyUrl(): string {
   return loadEditionConfig().legal.privacyPolicyUrl
 }
 
 /**
- * Get terms of service URL for current edition
+ * Get terms of service URL
  */
 export function getTermsOfServiceUrl(): string {
   return loadEditionConfig().legal.termsOfServiceUrl
 }
 
 /**
- * Get docs base URL for current edition
+ * Get docs base URL
  */
 export function getDocsBaseUrl(): string {
   return loadEditionConfig().docs.baseUrl
 }
 
 /**
- * Get speech WebSocket URL for current edition
+ * Get speech WebSocket URL
  */
 export function getSpeechWsUrl(): string {
   return loadEditionConfig().speech.wsUrl

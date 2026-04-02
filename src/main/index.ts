@@ -25,7 +25,6 @@ import * as fs from 'fs/promises'
 import { startDataSync } from './storage/data_sync/index'
 import type { SyncController as DataSyncController } from './storage/data_sync/core/SyncController'
 import { getChatermDbPathForUser, getCurrentUserId, setMainWindowWebContents } from './storage/db/connection'
-import { migrateCnUserDataOnFirstLaunch } from './storage/editionDataMigration'
 
 // Set environment variables
 process.env.IS_DEV = is.dev ? 'true' : 'false'
@@ -65,7 +64,7 @@ import {
 import { getPluginDetailsByName, getLocalizedStrings, getUserLanguage } from './plugin/pluginDetails'
 import { capabilityRegistry } from './ssh/capabilityRegistry'
 import { getActualTheme, loadUserTheme } from './themeManager'
-import { getEdition, getProtocolPrefix, getProtocolName } from './config/edition'
+import { getProtocolPrefix, getProtocolName } from './config/edition'
 import { registerKnowledgeBaseHandlers, initKbSearchManager, closeKbSearchManager } from './services/knowledgebase'
 import { registerStageChatAttachmentHandlers } from './services/agent/stageChatAttachment'
 import { startKbSync, stopKbSync } from './services/knowledgebase/sync'
@@ -197,14 +196,8 @@ app.whenReady().then(async () => {
       }
     })()
   }
-  // Set edition-specific AppUserModelId for Windows taskbar grouping and process identification
-  const edition = getEdition()
-  const appUserModelId = edition === 'global' ? 'ai.chaterm.global' : 'ai.chaterm.cn'
-  electronApp.setAppUserModelId(appUserModelId)
-
-  // Start CN user data migration in parallel (usually a no-op, but can be
-  // slow on first launch of global edition due to process detection)
-  const migrationPromise = migrateCnUserDataOnFirstLaunch().catch((err) => logger.error('CN migration failed', { error: err }))
+  // Set AppUserModelId for Windows taskbar grouping and process identification
+  electronApp.setAppUserModelId('ai.chaterm.global')
 
   if (process.platform === 'darwin') {
     app.dock?.setIcon(join(__dirname, '../../resources/icon.png'))
@@ -399,7 +392,6 @@ app.whenReady().then(async () => {
 
   // Ensure parallel tasks complete before marking ready
   if (ffmpegVerification) await ffmpegVerification
-  await migrationPromise
 
   // Call the test function (imported from ./agent/core/storage/state.ts)
   if (mainWindow && mainWindow.webContents) {
@@ -997,8 +989,7 @@ function setupIPC(): void {
       try {
         const kbSearchEnabled = await getGlobalState('kbSearchEnabled')
         if (kbSearchEnabled === undefined || kbSearchEnabled === null || kbSearchEnabled) {
-          const edition = getEdition()
-          const region = edition === 'cn' ? 'cn' : 'global'
+          const region = 'global'
 
           // Get API credentials from user's model configuration
           const state = await getAllExtensionState()

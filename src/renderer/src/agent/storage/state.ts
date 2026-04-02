@@ -129,7 +129,6 @@ export async function getAllExtensionState() {
     //requestyModelInfo,
     //togetherApiKey,
     //togetherModelId,
-    //qwenApiKey,
     //doubaoApiKey,
     //mistralApiKey,
     //azureApiVersion,
@@ -159,7 +158,6 @@ export async function getAllExtensionState() {
     previousModeReasoningEffort,
     previousModeAwsBedrockCustomSelected,
     previousModeAwsBedrockCustomModelBaseId,
-    //qwenApiLine,
     liteLlmApiKey,
     //asksageApiKey,
     //asksageApiUrl,
@@ -216,7 +214,6 @@ export async function getAllExtensionState() {
     //getGlobalState('requestyModelInfo') as Promise<ModelInfo | undefined>,
     //getSecret('togetherApiKey') as Promise<string | undefined>,
     //getGlobalState('togetherModelId') as Promise<string | undefined>,
-    //getSecret('qwenApiKey') as Promise<string | undefined>,
     //getSecret('doubaoApiKey') as Promise<string | undefined>,
     //getSecret('mistralApiKey') as Promise<string | undefined>,
     //getGlobalState('azureApiVersion') as Promise<string | undefined>,
@@ -345,8 +342,6 @@ export async function getAllExtensionState() {
       //requestyModelInfo,
       //togetherApiKey,
       //togetherModelId,
-      //qwenApiKey,
-      //qwenApiLine,
       //doubaoApiKey,
       //mistralApiKey,
       //azureApiVersion,
@@ -472,7 +467,6 @@ export async function updateApiConfiguration(apiConfiguration: ApiConfiguration)
   await updateGlobalState('anthropicModelId', anthropicModelId)
   //await storeSecret('requestyApiKey', requestyApiKey)
   //await storeSecret('togetherApiKey', togetherApiKey)
-  //await storeSecret('qwenApiKey', qwenApiKey)
   //await storeSecret('doubaoApiKey', doubaoApiKey)
   //await storeSecret('mistralApiKey', mistralApiKey)
   await storeSecret('liteLlmApiKey', liteLlmApiKey)
@@ -523,7 +517,6 @@ export async function resetExtensionState() {
     'anthropicApiKey',
     'requestyApiKey',
     'togetherApiKey',
-    'qwenApiKey',
     'doubaoApiKey',
     'mistralApiKey',
     'liteLlmApiKey',

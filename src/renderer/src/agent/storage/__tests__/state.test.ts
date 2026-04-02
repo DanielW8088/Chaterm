@@ -343,7 +343,6 @@ describe('State Management', () => {
       expect(storageContext.secrets.delete).toHaveBeenCalledWith('deepSeekApiKey')
       expect(storageContext.secrets.delete).toHaveBeenCalledWith('requestyApiKey')
       expect(storageContext.secrets.delete).toHaveBeenCalledWith('togetherApiKey')
-      expect(storageContext.secrets.delete).toHaveBeenCalledWith('qwenApiKey')
       expect(storageContext.secrets.delete).toHaveBeenCalledWith('doubaoApiKey')
       expect(storageContext.secrets.delete).toHaveBeenCalledWith('mistralApiKey')
       expect(storageContext.secrets.delete).toHaveBeenCalledWith('defaultApiKey')

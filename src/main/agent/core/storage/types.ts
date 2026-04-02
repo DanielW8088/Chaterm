@@ -50,7 +50,6 @@ export type SecretKey =
   | 'deepSeekApiKey'
   | 'requestyApiKey'
   | 'togetherApiKey'
-  | 'qwenApiKey'
   | 'doubaoApiKey'
   | 'mistralApiKey'
   | 'clineApiKey'

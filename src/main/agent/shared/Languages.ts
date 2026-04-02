@@ -45,17 +45,8 @@ export type LanguageDisplay =
   | 'Traditional Chinese - 繁體中文'
   | 'Turkish - Türkçe'
 
-// Default language based on edition (cn -> zh-CN, global -> en-US)
-// Uses APP_EDITION env variable set at build time
-// Returns locale code consistent with renderer i18n (zh-CN, en-US)
-function getDefaultLanguageFromEdition(): LanguageKey {
-  // `src/main` can access Node's `process`, but `src/renderer` (when importing this shared module)
-  // may not have `process` defined at runtime.
-  const edition = typeof process !== 'undefined' ? process.env.APP_EDITION || 'cn' : 'cn'
-  return edition === 'global' ? 'en-US' : 'zh-CN'
-}
-
-export const DEFAULT_LANGUAGE_SETTINGS: LanguageKey = getDefaultLanguageFromEdition()
+// Default language setting
+export const DEFAULT_LANGUAGE_SETTINGS: LanguageKey = 'en-US'
 
 export const languageOptions: { key: LanguageKey; display: LanguageDisplay }[] = [
   { key: 'en', display: 'English' },

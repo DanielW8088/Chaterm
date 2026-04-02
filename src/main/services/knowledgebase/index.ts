@@ -111,19 +111,8 @@ interface DefaultKbSeedsMeta {
   seeds: Record<string, DefaultSeedMetaEntry>
 }
 
-function isKbSearchRegion(value: unknown): value is 'cn' | 'global' {
-  return value === 'cn' || value === 'global'
-}
-
-function isValidBaseUrl(value: unknown): value is string {
-  if (typeof value !== 'string') return false
-  if (!value.trim()) return false
-  try {
-    const parsed = new URL(value)
-    return parsed.protocol === 'http:' || parsed.protocol === 'https:'
-  } catch {
-    return false
-  }
+function isKbSearchRegion(value: unknown): value is 'global' {
+  return value === 'global'
 }
 
 function normalizeKbSearchOptions(opts?: { maxResults?: number; minScore?: number }): { maxResults: number; minScore?: number } {
@@ -840,12 +829,10 @@ export function registerKnowledgeBaseHandlers(): void {
       }
       if (enabled) {
         const { getCurrentUserId } = await import('../../storage/db/connection')
-        const { getEdition } = await import('../../config/edition')
         const { getAllExtensionState } = await import('../../agent/core/storage/state')
         const uid = getCurrentUserId()
         if (!uid) return { success: false, error: 'User not logged in' }
-        const edition = getEdition()
-        const region = edition === 'cn' ? 'cn' : 'global'
+        const region = 'global'
 
         // Get API credentials from user's model configuration
         const state = await getAllExtensionState()
@@ -882,9 +869,6 @@ export function registerKnowledgeBaseHandlers(): void {
         return { success: false, error: 'Invalid API key' }
       }
       const baseUrl = config?.baseUrl ?? ''
-      if (config.region === 'cn' && !isValidBaseUrl(baseUrl)) {
-        return { success: false, error: 'Invalid baseUrl for cn region' }
-      }
 
       const mgr = await initKbSearchManager(userId, {
         region: config.region,

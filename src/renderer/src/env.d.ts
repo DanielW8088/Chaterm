@@ -5,9 +5,9 @@ declare const __APP_INFO__: {
   version: string
 }
 
-// Edition configuration injected at build time from build/edition-config/*.json
+// Edition configuration injected at build time from build/edition-config/global.json
 declare const __EDITION_CONFIG__: {
-  edition: 'cn' | 'global'
+  edition: string
   displayName: string
   api: {
     baseUrl: string

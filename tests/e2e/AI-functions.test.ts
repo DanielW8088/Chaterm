@@ -107,7 +107,7 @@ test.describe('AI Complete Workflow E2E Tests', () => {
 
   /**
    * Select AI model from the model dropdown
-   * @param modelName - The name of the model to select (e.g., 'Qwen-Plus', 'Qwen-Turbo', 'Deepseek-V3.1', 'Qwen-Plus-Thinking', 'Deepseek-R1-Thinking')
+   * @param modelName - The name of the model to select (e.g., 'Deepseek-V3.1', 'Deepseek-R1-Thinking')
    * @param timeout - Optional timeout in milliseconds (default: 10000)
    */
   const selectAiModel = async (modelName: string, timeout: number = 10000) => {
@@ -532,8 +532,8 @@ test.describe('AI Complete Workflow E2E Tests', () => {
   const setupMode = async (mode: 'Chat' | 'Command' | 'Agent', model?: string) => {
     const defaultModels = {
       Chat: 'Deepseek-R1-Thinking',
-      Command: 'Qwen-Plus',
-      Agent: 'Qwen-Plus'
+      Command: 'Deepseek-V3.1',
+      Agent: 'Deepseek-V3.1'
     }
 
     await selectTestHost()
@@ -586,9 +586,9 @@ test.describe('AI Complete Workflow E2E Tests', () => {
    * Run a complete Command mode test
    * @param input - The command or task to execute
    * @param timeout - Test timeout in milliseconds (default: 300000)
-   * @param model - AI model to use (default: 'Qwen-Plus')
+   * @param model - AI model to use (default: 'Deepseek-V3.1')
    */
-  const runCommandTest = async (input: string, timeout: number = 300000, model: string = 'Qwen-Plus') => {
+  const runCommandTest = async (input: string, timeout: number = 300000, model: string = 'Deepseek-V3.1') => {
     await runTest('Command', input, timeout, model)
   }
 
@@ -596,9 +596,9 @@ test.describe('AI Complete Workflow E2E Tests', () => {
    * Run a complete Agent mode test (backward compatibility)
    * @param input - The command or task to execute
    * @param timeout - Test timeout in milliseconds (default: 300000)
-   * @param model - AI model to use (default: 'Qwen-Plus')
+   * @param model - AI model to use (default: 'Deepseek-V3.1')
    */
-  const runAgentTest = async (input: string, timeout: number = 300000, model: string = 'Qwen-Plus') => {
+  const runAgentTest = async (input: string, timeout: number = 300000, model: string = 'Deepseek-V3.1') => {
     await runTest('Agent', input, timeout, model)
   }
 
@@ -721,7 +721,7 @@ test.describe('AI Complete Workflow E2E Tests', () => {
       await waitForMcpServerConnected('awslabs.aws-documentation-mcp-server', 60000)
 
       await switchToModeAndCreateNewChat('Agent')
-      await selectAiModel('Qwen-Plus')
+      await selectAiModel('Deepseek-V3.1')
 
       await executeTask('Agent', 'Use AWS MCP to find S3 bucket command best practices')
     })
@@ -907,24 +907,6 @@ test.describe('AI Complete Workflow E2E Tests', () => {
       expect(models.length).toBeGreaterThan(0)
     })
 
-    test('Select Qwen-Plus model', async () => {
-      test.setTimeout(60000)
-      await selectTestHost()
-
-      await selectAiModel('Qwen-Plus')
-
-      await electronHelper.window?.waitForTimeout(1000)
-    })
-
-    test('Select Qwen-Turbo model', async () => {
-      test.setTimeout(60000)
-      await selectTestHost()
-
-      await selectAiModel('Qwen-Turbo')
-
-      await electronHelper.window?.waitForTimeout(1000)
-    })
-
     test('Select Deepseek-V3.1 model', async () => {
       test.setTimeout(60000)
       await selectTestHost()
@@ -947,7 +929,7 @@ test.describe('AI Complete Workflow E2E Tests', () => {
       test.setTimeout(120000)
       await selectTestHost()
 
-      const modelsToTest = ['Qwen-Plus', 'Qwen-Turbo', 'Deepseek-V3.1']
+      const modelsToTest = ['Deepseek-V3.1', 'Deepseek-R1-Thinking']
 
       for (const modelName of modelsToTest) {
         console.log(`Testing model: ${modelName}`)
