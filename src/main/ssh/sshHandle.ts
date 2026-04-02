@@ -1,6 +1,5 @@
 import { BrowserWindow, dialog, ipcMain } from 'electron'
 import { Client } from 'ssh2'
-import type { SFTPWrapper } from 'ssh2'
 import { spawn } from 'child_process'
 import { Duplex } from 'stream'
 import type { CommandGenerationContext } from '@shared/WebviewMessage'
@@ -52,7 +51,6 @@ import { SSHAgentManager } from './ssh-agent/ChatermSSHAgent'
 import { getAlgorithmsByAssetType } from './algorithms'
 import { connectBastionByType, shellBastionSession, resizeBastionSession, writeBastionSession, disconnectBastionSession } from './bastionPlugin'
 import { shouldSkipPostConnectProbe } from './postConnectProbePolicy'
-import { sftpConnectionInfoMap } from './sftpTransfer'
 
 // Maximum buffer size before forcing an immediate flush (prevents unbounded growth during bulk output)
 const MAX_BUFFER_SIZE = 64 * 1024 // 64KB
@@ -99,13 +97,6 @@ export const sshConnectionPool = new Map<string, ReusableConnection>()
 export const getConnectionPoolKey = (host: string, port: number, username: string): string => {
   return `${host}:${port}:${username}`
 }
-
-interface SftpConnectionInfo {
-  isSuccess: boolean
-  sftp?: any
-  error?: string
-}
-export const sftpConnections = new Map<string, SftpConnectionInfo>()
 
 // Execute command result
 export interface ExecResult {
@@ -462,12 +453,6 @@ export const attemptSecondaryConnection = async (event, connectionInfo, existing
 
   const readyResult: { hasSudo?: boolean; commandList?: string[] } = {}
   if (existingConn) {
-    try {
-      await initSftpOnConnection(existingConn, id, connectionInfo)
-    } catch {
-      connectionStatus.set(id, { sftpAvailable: false, sftpError: 'SFTP connection failed' })
-    }
-
     // cmd list
     const cmdCheck = () =>
       new Promise<void>((resolve) => {
@@ -865,86 +850,6 @@ const handleAttemptConnection = async (event, connectionInfo, resolve, reject, r
     })
   })
 }
-export const getUniqueRemoteName = async (sftp: SFTPWrapper, remoteDir: string, originalName: string, isDir: boolean): Promise<string> => {
-  const list = await new Promise<{ filename: string; longname: string; attrs: any }[]>((resolve, reject) => {
-    sftp.readdir(remoteDir, (err, list) => (err ? reject(err) : resolve(list as any)))
-  })
-  let existing = new Set(list.map((f) => f.filename))
-
-  if (isDir) {
-    existing = new Set(list.filter((f) => f.attrs.isDirectory()).map((f) => f.filename))
-  }
-
-  let finalName = originalName
-  const { name, ext } = path.parse(originalName)
-  let count = 1
-
-  while (existing.has(finalName)) {
-    finalName = `${name}${ext}.${count}`
-    count++
-  }
-
-  return finalName
-}
-
-const findReusableSftpRecord = (id: string): any => {
-  const direct = sftpConnections.get(id)
-  if (direct) return direct
-
-  if (!id) return null
-
-  const prefix = id.substring(0, id.lastIndexOf(':') + 1)
-
-  for (const [existingId, existingRecord] of sftpConnections.entries()) {
-    const sessionPart = existingId.substring(existingId.lastIndexOf(':') + 1)
-    if (existingId.startsWith(prefix) && sessionPart.startsWith('files-')) {
-      return existingRecord
-    }
-  }
-
-  for (const [existingId, existingRecord] of sftpConnections.entries()) {
-    if (existingId.startsWith(prefix)) {
-      return existingRecord
-    }
-  }
-
-  return null
-}
-
-export const getSftpConnection = (id: string): any => {
-  const sftpConnectionInfo = findReusableSftpRecord(id)
-
-  if (!sftpConnectionInfo) {
-    logger.debug('SFTP connection not found', { event: 'ssh.sftp.notfound', connectionId: id })
-    return null
-  }
-
-  if (!sftpConnectionInfo.isSuccess || !sftpConnectionInfo.sftp) {
-    logger.debug('SFTP not available', {
-      event: 'ssh.sftp.unavailable',
-      connectionId: id,
-      error: sftpConnectionInfo.error || 'Unknown error'
-    })
-    return null
-  }
-
-  return sftpConnectionInfo.sftp
-}
-
-export const cleanSftpConnection = (id) => {
-  // Clean up SFTP
-  if (sftpConnections.get(id)) {
-    const sftp = getSftpConnection(id)
-    sftp.end()
-    sftpConnections.delete(id)
-    // if (sshConnections.get(id + '-second')) {
-    //   const connSec = sshConnections.get(id + '-second')
-    //   connSec.end()
-    //   sshConnections.delete(id + '-second')
-    // }
-  }
-}
-
 export const registerSSHHandlers = () => {
   // Handle connection
   ipcMain.handle('ssh:connect', async (_event, connectionInfo) => {
@@ -988,14 +893,6 @@ export const registerSSHHandlers = () => {
     return new Promise((resolve, reject) => {
       handleAttemptConnection(_event, connectionInfo, resolve, reject, retryCount)
     })
-  })
-
-  ipcMain.handle('ssh:sftp:conn:check', async (_event, { id }) => {
-    if (connectionStatus.has(id)) {
-      const status = connectionStatus.get(id)
-      return status?.sftpAvailable === true
-    }
-    return false
   })
 
   ipcMain.handle('ssh:shell', async (event, { id, terminalType, cols, rows }) => {
@@ -1625,7 +1522,6 @@ export const registerSSHHandlers = () => {
             connectionId: id
           })
         }
-        cleanSftpConnection(id)
         jumpserverConnections.delete(id)
         jumpserverConnectionStatus.delete(id)
         logger.info('JumpServer session disconnected', {
@@ -1692,9 +1588,7 @@ export const registerSSHHandlers = () => {
         // Regular connection not in reuse pool, close directly
         conn.end()
       }
-      cleanSftpConnection(id)
       sshConnections.delete(id)
-      sftpConnections.delete(id)
       clearSessionConnectionState(id)
       logger.info('SSH connection disconnected', {
         event: 'ssh.disconnect.success',
@@ -2150,62 +2044,4 @@ export const pickReconnectConnectionInfo = (connectionInfo: any) => {
     targetIp: connectionInfo.targetIp,
     terminalType: connectionInfo.terminalType
   }
-}
-
-export const initSftpOnConnection = (conn: Client, connectionId: string, connectionInfo: any): Promise<void> => {
-  return new Promise<void>((resolve) => {
-    try {
-      conn.sftp((err, sftp) => {
-        if (err || !sftp) {
-          logger.error(`SFTP check error `, { event: 'ssh.shell.sftp', connectionId: connectionId, error: err })
-
-          connectionStatus.set(connectionId, {
-            sftpAvailable: false,
-            sftpError: err?.message || 'SFTP object is empty'
-          })
-
-          sftpConnections.set(connectionId, {
-            isSuccess: false,
-            error: `sftp init error: "${err?.message || 'SFTP object is empty'}"`
-          })
-
-          resolve()
-          return
-        }
-
-        logger.info(`start SFTP `, { event: 'ssh.sftp.start', connectionId: connectionId })
-        sftp.readdir('.', (readDirErr) => {
-          if (readDirErr) {
-            logger.error(`SFTP check failed `, { event: 'ssh.shell.sftp', connectionId: connectionId, error: readDirErr.message })
-
-            connectionStatus.set(connectionId, {
-              sftpAvailable: false,
-              sftpError: readDirErr.message
-            })
-
-            try {
-              sftp.end()
-            } catch {}
-          } else {
-            logger.info(`SFTP check success`, { event: 'ssh.sftp.check', connectionId: connectionId })
-            sftpConnections.set(connectionId, { isSuccess: true, sftp })
-            connectionStatus.set(connectionId, { sftpAvailable: true })
-            const picked = pickReconnectConnectionInfo(connectionInfo)
-            if (picked) {
-              sftpConnectionInfoMap.set(String(connectionId), picked)
-            }
-          }
-          resolve()
-        })
-      })
-    } catch (e: any) {
-      const msg = e?.message || String(e)
-      connectionStatus.set(connectionId, {
-        sftpAvailable: false,
-        sftpError: msg
-      })
-      sftpConnections.set(connectionId, { isSuccess: false, error: `sftp exception: "${msg}"` })
-      resolve()
-    }
-  })
 }

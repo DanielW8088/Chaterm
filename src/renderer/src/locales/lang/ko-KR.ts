@@ -78,7 +78,6 @@ export default {
     deleteConfirm: '삭제 확인',
     deleteConfirmContent: '이 스니펫을 삭제하시겠습니까?',
     quickCommand: '스니펫',
-    fileManager: '파일 관리자',
     add: '추가',
     all: '모두',
     refresh: '새로고침',
@@ -506,7 +505,6 @@ export default {
       openCommandDialog: 'AI 명령 생성기 열기',
       searchHost: '호스트 검색',
       newTab: '새 탭',
-      openFileManager: '파일 관리자 열기',
       clearTerminal: '터미널 지우기',
       fontSizeIncrease: '글꼴 크기 증가',
       fontSizeDecrease: '글꼴 크기 감소',
@@ -519,7 +517,6 @@ export default {
       toggleLeftSidebar: '자산 목록',
       openSettings: '설정 열기',
       openCommandDialog: '인라인 명령 생성기 열기',
-      openFileManager: '파일 관리자 열기',
       clearTerminal: '터미널 지우기',
       toggleLayout: '레이아웃 토글 (터미널/에이전트)'
     }

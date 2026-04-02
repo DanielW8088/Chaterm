@@ -492,7 +492,6 @@ export default {
       openCommandDialog: 'فتح مولد الأوامر الذكاء الاصطناعي',
       searchHost: 'بحث المضيف',
       newTab: 'التبويب الجديد',
-      openFileManager: 'فتح مدير الملفات',
       clearTerminal: 'مسح التبويب',
       fontSizeIncrease: 'زيادة الحجم الخط',
       fontSizeDecrease: 'تقليل الحجم الخط',
@@ -505,7 +504,6 @@ export default {
       toggleLeftSidebar: 'قائمة الأصول',
       openSettings: 'فتح الإعدادات',
       openCommandDialog: 'مولد الأوامر المضمن',
-      openFileManager: 'فتح مدير الملفات',
       clearTerminal: 'مسح التبويب',
       toggleLayout: 'تبديل التخطيط (التبويب/الأجهزة)'
     }

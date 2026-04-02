@@ -78,7 +78,6 @@ export default {
     deleteConfirm: '削除確認',
     deleteConfirmContent: 'このスニペットを削除してもよろしいですか？',
     quickCommand: 'スニペット',
-    fileManager: 'ファイルマネージャー',
     add: '追加',
     all: 'すべて',
     refresh: '更新',
@@ -510,7 +509,6 @@ export default {
       openCommandDialog: 'AIコマンドジェネレーターを開く',
       searchHost: 'ホストを検索',
       newTab: '新しいタブ',
-      openFileManager: 'ファイルマネージャーを開く',
       clearTerminal: 'ターミナルをクリア',
       fontSizeIncrease: 'フォントサイズを増やす',
       fontSizeDecrease: 'フォントサイズを減らす',
@@ -523,7 +521,6 @@ export default {
       toggleLeftSidebar: '資産リスト',
       openSettings: '設定を開く',
       openCommandDialog: 'インラインコマンドジェネレーターを開く',
-      openFileManager: 'ファイルマネージャーを開く',
       clearTerminal: 'ターミナルをクリア',
       toggleLayout: 'レイアウトを切り替え(ターミナル/エージェント)'
     }

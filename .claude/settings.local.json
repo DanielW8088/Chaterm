@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \":*)",
+      "Bash(npm run:*)",
+      "Bash(npx tsc:*)",
+      "Bash(./node_modules/.bin/tsc --noEmit -p tsconfig.node.json)",
+      "Bash(node scripts/patch-package-lock.js)",
+      "Bash(npm install:*)",
+      "Bash(export NODE_OPTIONS=\"--max-old-space-size=8192\")",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(grep -E \"\\\\.\\(ts|js\\)$\")",
+      "Bash(find /Users/daniel/code/app/Chaterm/build -name *edition* -type f)"
+    ]
+  }
+}

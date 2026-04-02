@@ -6,23 +6,6 @@ import * as dotenv from 'dotenv'
 import * as path from 'path'
 import * as fs from 'fs'
 
-interface FileRecord {
-  name: string
-  path: string
-  isDir: boolean
-  mode: string
-  isLink: boolean
-  modTime: string
-  size: number
-}
-
-interface SftpConnectionInfo {
-  id: string
-  isSuccess: boolean
-  sftp?: import('ssh2').SFTPWrapper
-  error?: string
-}
-
 // Command list reception timeout (ms)
 const COMMAND_LIST_TIMEOUT = 30000
 
@@ -104,7 +87,6 @@ if (fs.existsSync(envSpecificPath)) {
 // Custom APIs for renderer
 import os from 'os'
 import { ExecResult } from '../main/ssh/sshHandle'
-import { SftpConnectResult } from '../main/ssh/sftpTransfer'
 
 const getLocalIP = (): string => {
   const interfaces = os.networkInterfaces()
@@ -816,14 +798,8 @@ const api = {
       }, COMMAND_LIST_TIMEOUT)
     })
   },
-  checkSftpConnAvailable: (id: string) => ipcRenderer.invoke('ssh:sftp:conn:check', { id }),
   shell: (params) => ipcRenderer.invoke('ssh:shell', params),
   resizeShell: (id, cols, rows) => ipcRenderer.invoke('ssh:shell:resize', { id, cols, rows }),
-  sshSftpList: (opts: { id: string; path: string }) => ipcRenderer.invoke('ssh:sftp:list', opts) as Promise<FileRecord[] | string[]>,
-  sftpConnList: () => ipcRenderer.invoke('ssh:sftp:conn:list') as Promise<SftpConnectionInfo[]>,
-  sftpConnect: (connectionInfo) => ipcRenderer.invoke('ssh:sftp:connect', connectionInfo) as Promise<SftpConnectResult>,
-  sftpClose: (payload: { id: string }) => ipcRenderer.invoke('ssh:sftp:close', payload),
-  sftpCancel: (payload: { id: string; requestId: string }) => ipcRenderer.invoke('ssh:sftp:cancel', payload),
   sshConnExec: (args: { id: string; cmd: string }) => ipcRenderer.invoke('ssh:conn:exec', args) as Promise<ExecResult>,
   writeToShell: (params) => ipcRenderer.send('ssh:shell:write', params),
 
@@ -951,40 +927,12 @@ const api = {
   },
   openExternalLogin: () => ipcRenderer.invoke('open-external-login'),
 
-  // sftp
-  onTransferProgress: (callback: (data: { id: string; remotePath: string; bytes: number; total: number; type: 'download' | 'upload' }) => void) => {
-    ipcRenderer.removeAllListeners('ssh:sftp:transfer-progress')
-    ipcRenderer.on('ssh:sftp:transfer-progress', (_event, data) => callback(data))
-  },
-  uploadFile: (opts: { id: string; remotePath: string; localPath: string }) => ipcRenderer.invoke('ssh:sftp:upload-file', opts),
-  uploadDirectory: (opts: { id: string; localDir: string; remoteDir: string }) => ipcRenderer.invoke('ssh:sftp:upload-directory', opts),
-  downloadFile: (opts: { id: string; remotePath: string; localPath: string }) => ipcRenderer.invoke('ssh:sftp:download-file', opts),
-  cancelFileTask: (opts: { taskKey: string }) => ipcRenderer.invoke('ssh:sftp:cancel-task', opts),
-  renameFile: (opts: { id: string; oldPath: string; newPath: string }) => ipcRenderer.invoke('ssh:sftp:rename-move', opts),
-  deleteFile: (opts: { id: string; remotePath: string }) => ipcRenderer.invoke('ssh:sftp:delete-file', opts),
-  chmodFile: (opts: { id: string; remotePath: string; mode: number; recursive: boolean }) => ipcRenderer.invoke('ssh:sftp:chmod', opts),
   openFileDialog: () => ipcRenderer.invoke('dialog:open-file'),
   openDirectoryDialog: () => ipcRenderer.invoke('dialog:open-directory'),
   openSaveDialog: (opts: { fileName: string }) => ipcRenderer.invoke('dialog:save-file', opts),
   writeLocalFile: async (filePath: string, content: string) => {
     await fs.promises.writeFile(filePath, content, 'utf-8')
   },
-  downloadDirectory: (args: { id: string; remoteDir: string; localDir: string }) => ipcRenderer.invoke('ssh:sftp:download-directory', args),
-
-  transferFileRemoteToRemote: (args: { fromId: string; toId: string; fromPath: string; toPath: string; autoRename?: boolean }) =>
-    ipcRenderer.invoke('sftp:r2r:file', args),
-
-  transferDirectoryRemoteToRemote: (args: {
-    fromId: string
-    toId: string
-    fromDir: string
-    toDir: string
-    autoRename?: boolean
-    concurrency?: number
-  }) => ipcRenderer.invoke('sftp:r2r:dir', args),
-
-  copyOrMoveBySftp: (args: { id: string; srcPath: string; targetPath: string; action: 'copy' | 'move' }) =>
-    ipcRenderer.invoke('ssh:sftp:copy-or-move', args),
 
   kbCheckPath: (absPath: string) => ipcRenderer.invoke('kb:check-path', { absPath }),
   kbEnsureRoot: () => ipcRenderer.invoke('kb:ensure-root'),

@@ -9,18 +9,7 @@
         :mouse-enter-delay="1"
       >
         <p
-          v-if="i.key === 'files'"
-          class="term_menu"
-          :class="{ active: activeKey === i.key }"
-          @click="files(i.key)"
-        >
-          <img
-            :src="i.icon"
-            alt=""
-          />
-        </p>
-        <p
-          v-else-if="i.key === 'knowledgecenter'"
+          v-if="i.key === 'knowledgecenter'"
           class="term_menu"
           :class="{ active: activeKey === i.key }"
           @click="menuClick(i.key)"
@@ -204,11 +193,6 @@ const openAiRight = () => {
 }
 const userConfig = () => {
   emit('open-user-tab', 'userConfig')
-}
-
-const files = (key) => {
-  emit('open-user-tab', 'files')
-  menuClick(key)
 }
 
 const api = (window as any).api

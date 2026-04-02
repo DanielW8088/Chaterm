@@ -57,7 +57,6 @@
         </template>
         <template v-else>
           <UserConfig v-if="localTab.content === 'userConfig'" />
-          <Files v-if="localTab.content === 'files'" />
           <KnowledgeCenterEditor
             v-if="localTab.content === 'KnowledgeCenterEditor' && localTab.props"
             :rel-path="localTab.props.relPath || ''"
@@ -104,7 +103,6 @@ import jumpserverSupport from '@views/components/Extensions/jumpserverSupport.vu
 import KeyManagement from '@views/components/LeftTab/config/keyManagement.vue'
 import SshConnect from '@views/components/Ssh/sshConnect.vue'
 import K8sConnect from '@views/components/K8s/K8sConnect.vue'
-import Files from '@views/components/Files/index.vue'
 import KnowledgeCenterEditor from '@views/components/Editors/KnowledgeCenterEditor.vue'
 import Kubernetes from '@views/components/Kubernetes/index.vue'
 import K8sClusterConfig from '@views/components/K8s/K8sClusterConfig.vue'

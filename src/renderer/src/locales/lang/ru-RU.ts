@@ -78,7 +78,6 @@ export default {
     deleteConfirm: 'Подтверждение удаления',
     deleteConfirmContent: 'Вы уверены, что хотите удалить этот фрагмент?',
     quickCommand: 'Фрагменты',
-    fileManager: 'Файловый менеджер',
     add: 'Добавить',
     all: 'Все',
     refresh: 'Обновить',
@@ -516,7 +515,6 @@ export default {
       openCommandDialog: 'Открыть генератор команд ИИ',
       searchHost: 'Поиск хоста',
       newTab: 'Новая вкладка',
-      openFileManager: 'Открыть менеджер файлов',
       clearTerminal: 'Очистить терминал',
       fontSizeIncrease: 'Увеличить размер шрифта',
       fontSizeDecrease: 'Уменьшить размер шрифта',
@@ -529,7 +527,6 @@ export default {
       toggleLeftSidebar: 'Список активов',
       openSettings: 'Открыть настройки',
       openCommandDialog: 'Генератор встроенных команд',
-      openFileManager: 'Открыть менеджер файлов',
       clearTerminal: 'Очистить терминал',
       toggleLayout: 'Переключить макет (терминал/агенты)'
     }

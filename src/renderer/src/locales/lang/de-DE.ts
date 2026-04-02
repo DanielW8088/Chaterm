@@ -78,7 +78,6 @@ export default {
     deleteConfirm: 'Löschen Bestätigung',
     deleteConfirmContent: 'Sind Sie sicher, dass Sie dieses Snippet löschen möchten?',
     quickCommand: 'Snippets',
-    fileManager: 'Dateimanager',
     add: 'Hinzufügen',
     all: 'Alle',
     refresh: 'Aktualisieren',
@@ -518,7 +517,6 @@ export default {
       openCommandDialog: 'AI-Befehl-Generator öffnen',
       searchHost: 'Host suchen',
       newTab: 'Neuer Tab',
-      openFileManager: 'Dateimanager öffnen',
       clearTerminal: 'Terminal leeren',
       fontSizeIncrease: 'Schriftgröße erhöhen',
       fontSizeDecrease: 'Schriftgröße verringern',
@@ -531,7 +529,6 @@ export default {
       toggleLeftSidebar: 'Asset List',
       openSettings: 'Einstellungen öffnen',
       openCommandDialog: 'Inline-Befehl-Generator öffnen',
-      openFileManager: 'Dateimanager öffnen',
       clearTerminal: 'Terminal leeren',
       toggleLayout: 'Layout umschalten (Terminal/Agents)'
     }

@@ -71,10 +71,6 @@
     <div class="context-menu-divider"></div>
 
     <!-- Tools Group -->
-    <v-contextmenu-item @click="onContextMenuAction('fileManager')">
-      {{ $t('common.fileManager') }}
-      <span class="shortcut-key">{{ fileManagerShortcut }}</span>
-    </v-contextmenu-item>
     <!-- <v-contextmenu-item @click="onContextMenuAction('shrotenName')">{{ $t('common.shrotenName') }}</v-contextmenu-item> -->
 
     <!-- Divider -->
@@ -99,14 +95,7 @@ import { ref, onMounted } from 'vue'
 import { isGlobalInput } from '../utils/termInputManager'
 
 const logger = createRendererLogger('ssh.context')
-import {
-  getCopyShortcut,
-  getPasteShortcut,
-  getCloseShortcut,
-  getSearchShortcut,
-  getClearTermShortcut,
-  getFileManagerShortcut
-} from '@/utils/shortcuts'
+import { getCopyShortcut, getPasteShortcut, getCloseShortcut, getSearchShortcut, getClearTermShortcut } from '@/utils/shortcuts'
 import eventBus from '@/utils/eventBus'
 import { getNewTabShortcut } from '@/utils/shortcuts'
 import { shortcutService } from '@/services/shortcutService'
@@ -118,7 +107,6 @@ const closeShortcut = ref('')
 const searchShortcut = ref('')
 const newTerminalShortcut = ref('')
 const clearTermShortcut = ref('')
-const fileManagerShortcut = ref('')
 const disconnectShortcut = ref('Ctrl+D')
 const reconnectShortcut = ref('Enter')
 const fontsizeLargenShortcut = ref('')
@@ -184,9 +172,6 @@ const onContextMenuAction = (action) => {
       isGlobalInput.value = !isGlobalInput.value
       break
 
-    case 'fileManager':
-      emit('contextAct', 'fileManager')
-      break
     case 'search':
       // Trigger search through event bus to open search interface
       eventBus.emit('openSearch')
@@ -232,7 +217,6 @@ onMounted(async () => {
     searchShortcut.value = await getSearchShortcut()
     newTerminalShortcut.value = await getNewTabShortcut()
     clearTermShortcut.value = await getClearTermShortcut()
-    fileManagerShortcut.value = await getFileManagerShortcut()
 
     // Get shortcuts from shortcutService to ensure consistency with settings
     const shortcuts = shortcutService.getShortcuts()
@@ -251,16 +235,11 @@ onMounted(async () => {
       // Update other shortcuts to ensure consistency
       const newTabShortcut = shortcuts.newTab
       const clearTerminalShortcut = shortcuts.clearTerminal
-      const openFileManagerShortcut = shortcuts.openFileManager
-
       if (newTabShortcut) {
         newTerminalShortcut.value = shortcutService.formatShortcut(newTabShortcut, 'newTab')
       }
       if (clearTerminalShortcut) {
         clearTermShortcut.value = shortcutService.formatShortcut(clearTerminalShortcut, 'clearTerminal')
-      }
-      if (openFileManagerShortcut) {
-        fileManagerShortcut.value = shortcutService.formatShortcut(openFileManagerShortcut, 'openFileManager')
       }
     }
   } catch (error) {
@@ -272,7 +251,6 @@ onMounted(async () => {
     searchShortcut.value = 'Ctrl+F'
     newTerminalShortcut.value = 'Ctrl+N'
     clearTermShortcut.value = 'Ctrl+P'
-    fileManagerShortcut.value = 'Ctrl+M'
     fontsizeLargenShortcut.value = 'Ctrl+='
     fontsizeSmallerShortcut.value = 'Ctrl+-'
   }

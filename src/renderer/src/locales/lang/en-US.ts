@@ -78,7 +78,6 @@ export default {
     deleteConfirm: 'Delete Confirmation',
     deleteConfirmContent: 'Are you sure you want to delete this snippet?',
     quickCommand: 'Snippets',
-    fileManager: 'File Manager',
     add: 'Add',
     all: 'All',
     refresh: 'Refresh',
@@ -514,7 +513,6 @@ export default {
       openCommandDialog: 'Open AI Command Generator',
       searchHost: 'Search Host',
       newTab: 'New Tab',
-      openFileManager: 'Open File Manager',
       clearTerminal: 'Clear Terminal',
       fontSizeIncrease: 'Font Size Increase',
       fontSizeDecrease: 'Font Size Decrease',
@@ -527,7 +525,6 @@ export default {
       toggleLeftSidebar: 'Asset List',
       openSettings: 'Open Settings',
       openCommandDialog: 'Inline Command Generator',
-      openFileManager: 'Open File Manager',
       clearTerminal: 'Clear Terminal',
       toggleLayout: 'Toggle Layout (Terminal/Agents)'
     }

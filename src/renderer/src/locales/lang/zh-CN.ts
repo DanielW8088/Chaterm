@@ -78,7 +78,6 @@ export default {
     deleteConfirm: '确认删除',
     deleteConfirmContent: '确定要删除这个快捷命令吗？',
     quickCommand: '快捷命令',
-    fileManager: '文件管理',
     add: '添加',
     all: '全部',
     refresh: '刷新',
@@ -502,7 +501,6 @@ export default {
       openCommandDialog: '打开AI命令生成对话框',
       searchHost: '搜索主机',
       newTab: '新Tab页',
-      openFileManager: '打开文件管理',
       clearTerminal: '清屏',
       fontSizeIncrease: '字体放大',
       fontSizeDecrease: '字体缩小',
@@ -515,7 +513,6 @@ export default {
       toggleLeftSidebar: '资产列表',
       openSettings: '打开设置',
       openCommandDialog: '内联命令生成',
-      openFileManager: '打开文件管理',
       clearTerminal: '清屏',
       toggleLayout: '切换布局（Terminal/Agents）'
     }

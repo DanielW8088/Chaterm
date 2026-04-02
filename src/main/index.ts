@@ -71,7 +71,6 @@ import { startKbSync, stopKbSync } from './services/knowledgebase/sync'
 import { setupInteractionIpcHandlers } from './agent/services/interaction-detector/ipc-handlers'
 import type { WebviewMessage } from '@shared/WebviewMessage'
 import type { SkillMetadata } from '@shared/skills'
-import { registerFileSystemHandlers } from './ssh/sftpTransfer'
 import { initLogging, logRendererCrash } from '@logging'
 import { parseXshellWakeupFromArgv, redactXshellWakeupForLog, type XshellWakeupPayload } from './integrations/xshellWakeup'
 
@@ -288,7 +287,6 @@ app.whenReady().then(async () => {
   registerSSHHandlers()
   registerLocalSSHHandlers()
   registerRemoteTerminalHandlers()
-  registerFileSystemHandlers()
   mark('chaterm/main/didRegisterSSH')
   registerUpdater(mainWindow, (value) => (forceQuit = value))
   setupPluginIpc()

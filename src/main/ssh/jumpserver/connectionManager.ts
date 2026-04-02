@@ -4,7 +4,7 @@ import net from 'net'
 import tls from 'tls'
 import type { Readable } from 'stream'
 import { createProxySocket } from '../proxy'
-import { attemptSecondaryConnection, keyboardInteractiveOpts, sftpConnections, connectionStatus } from '../sshHandle'
+import { attemptSecondaryConnection, keyboardInteractiveOpts } from '../sshHandle'
 import { LEGACY_ALGORITHMS } from '../algorithms'
 import { jumpserverConnections, jumpserverShellStreams, jumpserverMarkedCommands, jumpserverInputBuffer } from './state'
 import type { JumpServerConnectionInfo } from './constants'
@@ -42,39 +42,6 @@ export function getPackageInfo(
   }
 }
 
-// Establish SFTP
-const sftpAsync = (conn, connectionId) => {
-  return new Promise<void>((resolve) => {
-    conn.sftp((err, sftp) => {
-      if (err || !sftp) {
-        logger.debug('SFTP check error', { event: 'jumpserver.sftp.error', connectionId, error: err?.message || 'SFTP object is empty' })
-        connectionStatus.set(connectionId, {
-          sftpAvailable: false,
-          sftpError: err?.message || 'SFTP object is empty'
-        })
-        sftpConnections.set(connectionId, { isSuccess: false, error: `sftp init error: "${err?.message || 'SFTP object is empty'}"` })
-        resolve()
-      } else {
-        logger.debug('Starting SFTP check', { event: 'jumpserver.sftp.start', connectionId })
-        sftp.readdir('.', (readDirErr) => {
-          if (readDirErr) {
-            logger.debug('SFTP check failed', { event: 'jumpserver.sftp.failed', connectionId, error: readDirErr.message })
-            connectionStatus.set(connectionId, {
-              sftpAvailable: false,
-              sftpError: readDirErr.message
-            })
-            sftp.end()
-          } else {
-            logger.debug('SFTP check success', { event: 'jumpserver.sftp.success', connectionId })
-            sftpConnections.set(connectionId, { isSuccess: true, sftp: sftp })
-            connectionStatus.set(connectionId, { sftpAvailable: true })
-          }
-          resolve()
-        })
-      }
-    })
-  })
-}
 const attemptJumpServerConnection = async (
   connectionInfo: JumpServerConnectionInfo,
   event?: Electron.IpcMainInvokeEvent,
@@ -126,16 +93,6 @@ const attemptJumpServerConnection = async (
               })
               reject(new Error(`Failed to create shell with reused connection: ${err.message}`))
               return
-            }
-            // Establish SFTP connection
-            // TODO: Reuse conn implementation for JumpServer, other bastion hosts may need new conn
-            try {
-              sftpAsync(conn, connectionId)
-            } catch (e) {
-              connectionStatus.set(connectionId, {
-                sftpAvailable: false,
-                sftpError: 'SFTP connection failed'
-              })
             }
             setupJumpServerInteraction(newStream, connectionInfo, connectionId, jumpserverUuid, conn, event, sendStatusUpdate, resolve, reject)
           })

@@ -123,17 +123,6 @@ export const shortcutActions: Omit<ShortcutAction, 'name'>[] = [
     }
   },
   {
-    id: 'openFileManager',
-    nameKey: 'shortcuts.actions.openFileManager',
-    defaultKey: {
-      mac: 'Command+M',
-      other: 'Ctrl+M'
-    },
-    handler: () => {
-      eventBus.emit('openUserTab', 'files')
-    }
-  },
-  {
     id: 'clearTerminal',
     nameKey: 'shortcuts.actions.clearTerminal',
     defaultKey: {

@@ -78,7 +78,6 @@ export default {
     deleteConfirm: 'Confirmar Eliminação',
     deleteConfirmContent: 'Tem a certeza de que deseja eliminar este snippet?',
     quickCommand: 'Snippets',
-    fileManager: 'Gestor de Ficheiros',
     add: 'Adicionar',
     all: 'Tudo',
     refresh: 'Atualizar',
@@ -517,7 +516,6 @@ export default {
       openCommandDialog: 'Abrir gerador de comando AI',
       searchHost: 'Pesquisar host',
       newTab: 'Nova aba',
-      openFileManager: 'Abrir gerenciador de arquivos',
       clearTerminal: 'Limpar terminal',
       fontSizeIncrease: 'Aumentar tamanho da fonte',
       fontSizeDecrease: 'Diminuir tamanho da fonte',
@@ -530,7 +528,6 @@ export default {
       toggleLeftSidebar: 'Lista de ativos',
       openSettings: 'Abrir configurações',
       openCommandDialog: 'Gerador de comando inline',
-      openFileManager: 'Abrir gerenciador de arquivos',
       clearTerminal: 'Limpar terminal',
       toggleLayout: 'Alternar layout (terminal/agents)'
     }

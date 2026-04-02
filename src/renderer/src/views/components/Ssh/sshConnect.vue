@@ -85,15 +85,10 @@
   </div>
 
   <!-- MFA dialog has been moved to global component -->
-
-  <TransferPanel />
 </template>
 
 <script lang="ts" setup>
 const copyText = ref('')
-
-import TransferPanel from '@views/components/Files/fileTransferProgress.vue'
-import { ensureTransferListener } from '@views/components/Files/fileTransfer'
 
 import SearchComp from './components/searchComp.vue'
 
@@ -587,7 +582,6 @@ onMounted(async () => {
     }
   })
 
-  ensureTransferListener()
   // Enable GPU-accelerated rendering for better performance with large output
   try {
     const { WebglAddon } = await import('@xterm/addon-webgl')
@@ -4767,9 +4761,6 @@ const contextAct = (action) => {
       break
     case 'fontsizeSmaller':
       adjustFontSize(-1)
-      break
-    case 'fileManager':
-      eventBus.emit('openUserTab', 'files')
       break
     default:
       break
